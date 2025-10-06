@@ -17,11 +17,31 @@ const { authenticateSocket } = require('./middleware/socketAuth');
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO setup
+// CORS origin checker function
+const corsOriginChecker = (origin, callback) => {
+  // Allow requests with no origin (like mobile apps or curl requests)
+  if (!origin) return callback(null, true);
+  
+  // Get allowed origins from env
+  const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(',') || ['http://localhost:3000'];
+  
+  // Check if origin matches allowed origins or is a Vercel preview URL
+  const isAllowed = allowedOrigins.some(allowed => origin === allowed) ||
+                    origin.endsWith('.vercel.app');
+  
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+};
+
+// Socket.IO setup with dynamic CORS
 const io = socketIo(server, {
   cors: {
-    origin: process.env.SOCKET_CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
-    methods: ['GET', 'POST']
+    origin: corsOriginChecker,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
@@ -39,9 +59,9 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
+// CORS configuration with dynamic origin checker
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN?.split(',') || ['http://localhost:3000'],
+  origin: corsOriginChecker,
   credentials: true
 }));
 
