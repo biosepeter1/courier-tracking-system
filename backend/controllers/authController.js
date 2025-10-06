@@ -4,7 +4,7 @@ const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
 const { sendEmail } = require('../utils/emailService');
-const { passwordResetEmail } = require('../utils/emailTemplates');
+const { passwordResetEmail, welcomeEmail } = require('../utils/emailTemplates');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -41,6 +41,21 @@ const register = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+
+    // Send welcome email
+    try {
+      const emailContent = welcomeEmail(user.name, user.email);
+      await sendEmail({
+        to: user.email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text
+      });
+      console.log(`📧 Welcome email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Don't fail the registration if email fails
+    }
 
     res.status(201).json({
       success: true,

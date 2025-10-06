@@ -376,10 +376,82 @@ const adminReplyEmail = (originalMessage, replyText, adminName) => {
   return { subject, html, text }
 }
 
+// Welcome Email
+const welcomeEmail = (userName, userEmail) => {
+  const subject = 'Welcome to Courier Tracking System!'
+  const html = `
+    ${getEmailHeader()}
+    <h2 style="color: #111827; margin-bottom: 20px;">🎉 Welcome to Courier Tracking System!</h2>
+    
+    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+      Hello ${userName},
+    </p>
+    
+    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+      Thank you for registering with Courier Tracking System! Your account has been successfully created.
+    </p>
+    
+    <div style="background-color: #d1fae5; border: 2px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <h3 style="color: #047857; margin: 0 0 15px 0;">✅ Account Created Successfully</h3>
+      <p style="color: #065f46; margin: 0;">
+        <strong>Email:</strong> ${userEmail}
+      </p>
+    </div>
+    
+    <div style="margin: 25px 0;">
+      <h3 style="color: #111827; margin-bottom: 15px;">What you can do:</h3>
+      <ul style="color: #374151; line-height: 2;">
+        <li>📦 Track your shipments in real-time</li>
+        <li>🚀 Create new shipment requests</li>
+        <li>📊 View shipment history and analytics</li>
+        <li>🔔 Receive instant email notifications</li>
+        <li>👤 Manage your profile settings</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${process.env.ALLOWED_ORIGIN}/login" 
+         style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+        Login to Your Account
+      </a>
+    </div>
+    
+    <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+      If you have any questions or need assistance, please don't hesitate to contact our support team.
+    </p>
+    
+    ${getEmailFooter()}
+  `
+  
+  const text = `
+    Welcome to Courier Tracking System!
+    
+    Hello ${userName},
+    
+    Thank you for registering! Your account has been successfully created.
+    
+    Email: ${userEmail}
+    
+    What you can do:
+    - Track your shipments in real-time
+    - Create new shipment requests
+    - View shipment history and analytics
+    - Receive instant email notifications
+    - Manage your profile settings
+    
+    Login to your account: ${process.env.ALLOWED_ORIGIN}/login
+    
+    If you have any questions, please contact our support team.
+  `
+  
+  return { subject, html, text }
+}
+
 module.exports = {
   shipmentCreatedEmail,
   shipmentStatusUpdateEmail,
   passwordResetEmail,
   contactMessageReceivedEmail,
-  adminReplyEmail
+  adminReplyEmail,
+  welcomeEmail
 }
