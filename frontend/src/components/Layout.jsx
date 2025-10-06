@@ -46,16 +46,15 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       {/* Mobile sidebar backdrop with animation */}
-      <div 
-        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
-          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-      </div>
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-[60] md:hidden bg-gray-900/70 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Mobile sidebar with slide animation */}
-      <div className={`fixed inset-y-0 left-0 flex z-50 md:hidden transition-transform duration-300 ease-in-out transform ${
+      <div className={`fixed inset-y-0 left-0 z-[70] md:hidden transition-transform duration-300 ease-in-out ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="relative flex-1 flex flex-col max-w-[280px] sm:max-w-xs w-full bg-background shadow-2xl">
