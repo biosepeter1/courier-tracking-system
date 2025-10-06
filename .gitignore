@@ -36,3 +36,11 @@ coverage/
 # Misc
 *.pem
 .vercel
+
+# Documentation with sensitive info (keep local only)
+*_SETUP.md
+*_FIX.md
+*_UPDATE.md
+PRODUCTION*.md
+EMAIL*.md
+MOBILE*.md
