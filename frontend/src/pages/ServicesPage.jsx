@@ -15,76 +15,14 @@ import {
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import PublicHeader from '../components/PublicHeader'
 
 
 function ServicesPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
-      >
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <motion.div
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-          >
-            <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">CourierTrack</span>
-          </motion.div>
-          <nav className="hidden md:flex items-center space-x-6">
-            {[
-              { label: 'Pricing', to: '/pricing', delay: 0.1 },
-              { label: 'Testimonials', to: '/testimonials', delay: 0.15 },
-              { label: 'Contact', to: '/contact', delay: 0.2 },
-            ].map((link) => (
-              <motion.div
-                key={link.label}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: link.delay }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <Link to={link.to} className="text-muted-foreground hover:text-foreground">
-                  {link.label}
-                </Link>
-              </motion.div>
-            ))}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Link to="/services" className="text-muted-foreground hover:text-foreground">Services</Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Button variant="outline" asChild>
-                <Link to="/login">Login</Link>
-              </Button>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Button asChild>
-                <Link to="/register">Sign Up</Link>
-              </Button>
-            </motion.div>
-          </nav>
-        </div>
-      </motion.header>
+      {/* Header with Mobile Menu */}
+      <PublicHeader />
 
       {/* Hero Banner */}
       <section className="relative overflow-hidden">
