@@ -1,0 +1,70 @@
+========================================
+VERCEL ENVIRONMENT VARIABLES SETUP
+========================================
+
+YOU MUST DO THIS TO FIX THE LOCALHOST CONNECTION ERROR!
+
+Step 1: Go to Vercel Dashboard
+------------------------------
+URL: https://vercel.com/dashboard
+
+
+Step 2: Open Your Project
+------------------------------
+Click on: courier-tracking-system (or your project name)
+
+
+Step 3: Go to Settings
+------------------------------
+Click: Settings (top navigation)
+
+
+Step 4: Environment Variables
+------------------------------
+Click: Environment Variables (left sidebar)
+
+
+Step 5: Add These Variables
+------------------------------
+
+Variable 1:
+-----------
+Name: VITE_API_BASE_URL
+Value: https://courier-tracking-system-nkdz.onrender.com/api
+Environments: ✓ Production  ✓ Preview  ✓ Development
+Click: Save
+
+Variable 2:
+-----------
+Name: VITE_SOCKET_URL
+Value: https://courier-tracking-system-nkdz.onrender.com
+Environments: ✓ Production  ✓ Preview  ✓ Development
+Click: Save
+
+
+Step 6: Redeploy
+------------------------------
+1. Go to: Deployments (top navigation)
+2. Click: ... (three dots) on the latest deployment
+3. Click: Redeploy
+4. Wait for deployment to complete (~2-3 minutes)
+
+
+Step 7: Test
+------------------------------
+After redeployment, visit:
+https://courier-tracking-system-omega.vercel.app/
+
+Try to login - it should now work!
+
+
+========================================
+WHY THIS IS NECESSARY
+========================================
+
+Vite reads environment variables at BUILD TIME, not runtime.
+The .env.production file is NOT included in the deployed build.
+You MUST set environment variables in Vercel's dashboard so
+they are available during the build process.
+
+========================================
