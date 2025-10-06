@@ -45,15 +45,24 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-      {/* Mobile sidebar */}
-      <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarOpen ? '' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-background">
+      {/* Mobile sidebar backdrop with animation */}
+      <div 
+        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* Mobile sidebar with slide animation */}
+      <div className={`fixed inset-y-0 left-0 flex z-50 md:hidden transition-transform duration-300 ease-in-out transform ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="relative flex-1 flex flex-col max-w-[280px] sm:max-w-xs w-full bg-background shadow-2xl">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               type="button"
-              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="h-6 w-6 text-white" />
@@ -61,10 +70,15 @@ const Layout = ({ children }) => {
           </div>
           
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <div className="flex-shrink-0 flex items-center px-4">
+            {/* Clickable Logo - Mobile */}
+            <Link 
+              to="/dashboard"
+              className="flex-shrink-0 flex items-center px-4 hover:opacity-80 transition-opacity"
+              onClick={() => setSidebarOpen(false)}
+            >
               <Package className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold">CourierTrack</span>
-            </div>
+              <span className="ml-2 text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">CourierTrack</span>
+            </Link>
             <nav className="mt-5 px-2 space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href
@@ -110,13 +124,17 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+      <div className="hidden md:flex md:w-64 lg:w-72 xl:w-80 md:flex-col md:fixed md:inset-y-0">
         <div className="flex-1 flex flex-col min-h-0 border-r border-border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50">
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
+            {/* Clickable Logo - Desktop */}
+            <Link 
+              to="/dashboard"
+              className="flex items-center flex-shrink-0 px-4 hover:opacity-80 transition-opacity"
+            >
               <Package className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold">CourierTrack</span>
-            </div>
+              <span className="ml-2 text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">CourierTrack</span>
+            </Link>
             <nav className="mt-5 flex-1 px-2 space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href
@@ -162,16 +180,24 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className="md:pl-64 lg:pl-72 xl:pl-80 flex flex-col flex-1">
         {/* Mobile header */}
-        <div className="sticky top-0 z-10 md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <button
-            type="button"
-            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+        <div className="sticky top-0 z-30 md:hidden px-2 py-3 sm:px-4 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/90 border-b border-border shadow-sm">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              className="h-10 w-10 inline-flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-900 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            {/* Mobile Logo */}
+            <Link to="/dashboard" className="flex items-center">
+              <Package className="h-6 w-6 text-primary" />
+              <span className="ml-2 text-lg font-bold">CourierTrack</span>
+            </Link>
+            <div className="w-10" /> {/* Spacer for centering */}
+          </div>
         </div>
 
         {/* Page content */}

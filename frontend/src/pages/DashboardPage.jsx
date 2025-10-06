@@ -115,46 +115,46 @@ const DashboardPage = () => {
 
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="md:flex md:items-center md:justify-between">
+      <div className="py-3 sm:py-4 md:py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="md:flex md:items-center md:justify-between mb-4 sm:mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-7 text-gray-900">
                 {isAdmin ? 'Admin Dashboard' : 'My Dashboard'}
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">
                 Welcome back, {user?.name}!
               </p>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="mt-8">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+          {/* Stats Cards - Mobile Optimized */}
+          <div className="mt-4 sm:mt-6 md:mt-8">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-5">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium">
                     Total Shipments
                   </CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{isAdmin ? stats.total : shipments.length}</div>
-                  <p className="text-xs text-muted-foreground">
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{isAdmin ? stats.total : shipments.length}</div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {isAdmin ? 'All shipments in system' : 'Your shipments'}
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium">
                     Pending Approval
                   </CardTitle>
-                  <Clock className="h-4 w-4 text-yellow-600" />
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                     {isAdmin 
                       ? stats.pending 
                       : shipments.filter(s => ['Pending', 'Processing', 'Confirmed'].includes(s.status)).length
@@ -182,35 +182,35 @@ const DashboardPage = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium">
                     In Transit
                   </CardTitle>
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                     {isAdmin ? stats.inTransit : shipments.filter(s => ['Picked Up', 'In Transit', 'Out for Delivery'].includes(s.status)).length}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     Currently moving
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium">
                     Delivered
                   </CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                     {isAdmin ? stats.delivered : shipments.filter(s => s.status === 'Delivered').length}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     Successfully delivered
                   </p>
                 </CardContent>
@@ -218,82 +218,84 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Recent Shipments */}
-          <div className="mt-8">
+          {/* Recent Shipments - Mobile Optimized */}
+          <div className="mt-4 sm:mt-6 md:mt-8">
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Recent Shipments</CardTitle>
-                    <CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex-1">
+                    <CardTitle className="text-base sm:text-lg">Recent Shipments</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm mt-1">
                       {isAdmin ? 'Latest shipments in the system' : 'Your recent shipment activity'}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="w-full sm:w-auto">
                     <div className="relative">
-                      <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+                      <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <Input
-                        placeholder="Search shipments..."
+                        placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
+                        className="pl-10 w-full sm:w-48 md:w-64 h-9 text-sm"
                       />
                     </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 {error && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{error}</AlertDescription>
+                  <Alert variant="destructive" className="mb-3 sm:mb-4">
+                    <AlertDescription className="text-sm">{error}</AlertDescription>
                   </Alert>
                 )}
 
                 {filteredShipments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">No shipments found</h3>
-                    <p className="text-sm text-gray-500">
+                  <div className="text-center py-6 sm:py-8">
+                    <Package className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-2">No shipments found</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {searchTerm ? 'Try adjusting your search terms.' : 'No shipments available at the moment.'}
                     </p>
                   </div>
                 ) : (
                   <div className="overflow-hidden">
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {filteredShipments.map((shipment) => (
                         <div
                           key={shipment._id}
-                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors gap-2 sm:gap-0"
                         >
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                             <div className="flex-shrink-0">
-                              <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(shipment.status)}`}>
+                              <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(shipment.status)}`}>
                                 {getStatusIcon(shipment.status)}
-                                <span className="ml-1">{shipment.status}</span>
+                                <span className="ml-1 hidden sm:inline">{shipment.status}</span>
+                                <span className="ml-1 sm:hidden">{shipment.status.substring(0, 3)}</span>
                               </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                                 {shipment.trackingNumber}
                               </p>
-                              <p className="text-sm text-gray-500">
-                                To: {shipment.receiver.name} • {shipment.destination}
+                              <p className="text-xs sm:text-sm text-gray-500 truncate mt-0.5">
+                                To: {shipment.receiver.name}
+                              </p>
+                              <p className="text-xs text-gray-400 truncate mt-0.5">
+                                {shipment.destination}
                               </p>
                               {shipment.currentLocation && (
                                 <div className="flex items-center mt-1 text-xs text-gray-400">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {shipment.currentLocation}
+                                  <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                                  <span className="truncate">{shipment.currentLocation}</span>
                                 </div>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-right">
-                              <p className="text-xs text-gray-500">
-                                {formatDateTime(shipment.updatedAt)}
-                              </p>
-                            </div>
-                            <Button variant="ghost" size="sm" asChild>
+                          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+                            <p className="text-xs text-gray-500">
+                              {formatDateTime(shipment.updatedAt)}
+                            </p>
+                            <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0">
                               <Link to={`/track/${shipment.trackingNumber}`}>
                                 <Eye className="h-4 w-4" />
                               </Link>
@@ -304,8 +306,8 @@ const DashboardPage = () => {
                     </div>
 
                     {filteredShipments.length > 0 && (
-                      <div className="mt-4 text-center">
-                        <Button variant="outline" asChild>
+                      <div className="mt-3 sm:mt-4 text-center">
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
                           <Link to={isAdmin ? "/admin/shipments" : "/shipments"}>
                             View All Shipments
                           </Link>

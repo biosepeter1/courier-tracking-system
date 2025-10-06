@@ -123,24 +123,24 @@ const AnalyticsPage = () => {
 
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          {/* Header */}
+      <div className="py-3 sm:py-4 md:py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          {/* Header - Mobile Optimized */}
           <motion.div 
-            className="mb-8"
+            className="mb-4 sm:mb-6 md:mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Analytics Dashboard
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                   Real-time insights and performance metrics
                 </p>
               </div>
@@ -148,13 +148,13 @@ const AnalyticsPage = () => {
           </motion.div>
 
           {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="mb-4 sm:mb-6">
+              <AlertDescription className="text-sm">{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Stats Grid - Mobile Optimized */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             {statusCards.map((stat, index) => {
               const Icon = stat.icon
               return (
@@ -167,16 +167,16 @@ const AnalyticsPage = () => {
                 >
                   <Card className="shadow-md hover:shadow-xl transition-all duration-300 border-border/50 relative overflow-hidden">
                     <motion.div 
-                      className={`absolute top-0 right-0 w-32 h-32 ${stat.color} opacity-5 blur-2xl rounded-full`}
+                      className={`absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 ${stat.color} opacity-5 blur-2xl rounded-full`}
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
-                    <CardContent className="pt-6 relative z-10">
+                    <CardContent className="p-4 sm:pt-6 sm:px-6 relative z-10">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground mb-2">{stat.title}</p>
+                        <div className="flex-1">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">{stat.title}</p>
                           <motion.p 
-                            className="text-4xl font-extrabold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent"
+                            className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ duration: 0.5, delay: index * 0.1 + 0.2, type: 'spring' }}
@@ -185,11 +185,11 @@ const AnalyticsPage = () => {
                           </motion.p>
                         </div>
                         <motion.div 
-                          className={`${stat.bgColor} p-4 rounded-2xl shadow-lg`}
+                          className={`${stat.bgColor} p-2.5 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl shadow-lg`}
                           whileHover={{ rotate: 360, scale: 1.1 }}
                           transition={{ duration: 0.6 }}
                         >
-                          <Icon className={`h-7 w-7 ${stat.textColor}`} />
+                          <Icon className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 ${stat.textColor}`} />
                         </motion.div>
                       </div>
                     </CardContent>
@@ -199,23 +199,23 @@ const AnalyticsPage = () => {
             })}
           </div>
 
-          {/* Status Breakdown Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Status Breakdown Chart - Mobile Optimized */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
               <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 h-full">
-                <CardHeader>
+                <CardHeader className="p-4 sm:p-6">
                   <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    <CardTitle>Status Distribution</CardTitle>
+                    <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <CardTitle className="text-base sm:text-lg">Status Distribution</CardTitle>
                   </div>
-                  <CardDescription>Breakdown of shipments by current status</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm mt-1">Breakdown of shipments by current status</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-5">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4 md:space-y-5">
                     {stats.statusBreakdown.map((item, index) => {
                       const percentage = stats.totalShipments > 0 
                         ? Math.round((item.count / stats.totalShipments) * 100) 
@@ -228,15 +228,15 @@ const AnalyticsPage = () => {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-semibold text-foreground">{item._id}</span>
-                            <span className="text-sm font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                            <span className="text-xs sm:text-sm font-semibold text-foreground">{item._id}</span>
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                               {item.count} <span className="text-primary">({percentage}%)</span>
                             </span>
                           </div>
-                          <div className="w-full bg-muted/50 rounded-full h-3 overflow-hidden">
+                          <div className="w-full bg-muted/50 rounded-full h-2 sm:h-2.5 md:h-3 overflow-hidden">
                             <motion.div 
-                              className="bg-gradient-to-r from-primary to-primary/70 h-3 rounded-full"
+                              className="bg-gradient-to-r from-primary to-primary/70 h-2 sm:h-2.5 md:h-3 rounded-full"
                               initial={{ width: 0 }}
                               animate={{ width: `${percentage}%` }}
                               transition={{ duration: 0.8, delay: index * 0.1 + 0.2 }}
@@ -256,15 +256,15 @@ const AnalyticsPage = () => {
               transition={{ duration: 0.5, delay: 0.7 }}
             >
               <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 h-full">
-                <CardHeader>
+                <CardHeader className="p-4 sm:p-6">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <CardTitle>Performance Metrics</CardTitle>
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <CardTitle className="text-base sm:text-lg">Performance Metrics</CardTitle>
                   </div>
-                  <CardDescription>Key performance indicators</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm mt-1">Key performance indicators</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-7">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4 sm:space-y-5 md:space-y-7">
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -354,48 +354,48 @@ const AnalyticsPage = () => {
             </motion.div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Recent Activity - Mobile Optimized */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1.2 }}
           >
             <Card className="shadow-md hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-primary" />
-                      <CardTitle>Recent Shipments</CardTitle>
+                      <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      <CardTitle className="text-base sm:text-lg">Recent Shipments</CardTitle>
                     </div>
-                    <CardDescription className="mt-1">Latest 10 shipments in the system</CardDescription>
+                    <CardDescription className="text-xs sm:text-sm mt-0.5 sm:mt-1">Latest 10 shipments in the system</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-3 sm:p-6">
+                <div className="space-y-2 sm:space-y-3">
                   {recentShipments.map((shipment, index) => (
                     <motion.div 
                       key={shipment._id} 
-                      className="flex items-center justify-between p-4 border border-border/50 rounded-xl hover:bg-muted/30 hover:border-primary/20 transition-all duration-200 group cursor-pointer"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-border/50 rounded-lg sm:rounded-xl hover:bg-muted/30 hover:border-primary/20 transition-all duration-200 group cursor-pointer gap-2 sm:gap-0"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: 1.3 + index * 0.05 }}
                       whileHover={{ x: 4 }}
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                          <Package className="h-5 w-5 text-primary" />
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className="p-2 sm:p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors flex-shrink-0">
+                          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                             {shipment.trackingNumber}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{shipment.receiver.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{shipment.receiver.name}</p>
                         </div>
                       </div>
                       <motion.span 
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor(shipment.status)}`}
+                        className={`inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold ${getStatusColor(shipment.status)} self-start sm:self-auto`}
                         whileHover={{ scale: 1.05 }}
                       >
                         {shipment.status}
