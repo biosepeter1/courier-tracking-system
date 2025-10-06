@@ -28,6 +28,7 @@ const QuotePage = lazy(() => import('./pages/QuotePage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const MessagesPage = lazy(() => import('./pages/admin/MessagesPage'))
+const DebugPage = lazy(() => import('./pages/Debug'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
             <Route path="/quote" element={<QuotePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/debug" element={<DebugPage />} />
             <Route path="/track/:trackingNumber" element={<TrackingPage />} />
             
             {/* Protected Routes */}
