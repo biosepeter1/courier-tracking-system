@@ -544,9 +544,9 @@ const ShipmentMap = ({ shipment }) => {
         )}
         </MapContainer>
 
-        {/* Enhanced Current Location Info Overlay */}
+        {/* Enhanced Current Location Info Overlay - Hidden on mobile */}
         {coordinates.current && (
-          <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-white/95 backdrop-blur-md rounded-lg md:rounded-xl shadow-2xl p-3 md:p-4 border-2 border-primary/30 max-w-[200px] md:max-w-xs" style={{ zIndex: 1000 }}>
+          <div className="hidden md:block absolute top-2 right-2 md:top-4 md:right-4 bg-white/95 backdrop-blur-md rounded-lg md:rounded-xl shadow-2xl p-3 md:p-4 border-2 border-primary/30 max-w-[200px] md:max-w-xs" style={{ zIndex: 1000 }}>
             <div className="flex items-center gap-3 mb-3 pb-3 border-b-2 border-gray-100">
               <div className="h-12 w-12 rounded-full bg-gradient-to-br from-pink-500 to-red-600 flex items-center justify-center shadow-lg animate-pulse">
                 <Plane className="h-6 w-6 text-white" />
@@ -628,8 +628,8 @@ const ShipmentMap = ({ shipment }) => {
           </div>
         </div>
 
-        {/* Enhanced Legend */}
-        <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-white/95 backdrop-blur-md rounded-lg md:rounded-xl shadow-2xl p-2 md:p-4 border-2 border-primary/30" style={{ zIndex: 1000 }}>
+        {/* Enhanced Legend - Hidden on mobile */}
+        <div className="hidden md:block absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-white/95 backdrop-blur-md rounded-lg md:rounded-xl shadow-2xl p-2 md:p-4 border-2 border-primary/30" style={{ zIndex: 1000 }}>
           <div className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 md:mb-3">Map Legend</div>
           <div className="space-y-1.5 md:space-y-2.5 text-xs md:text-sm">
             <div className="flex items-center gap-2">

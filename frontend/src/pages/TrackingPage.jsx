@@ -281,9 +281,9 @@ const TrackingPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Current Location Card */}
+          {/* Current Location Card - Hidden on mobile for better map visibility */}
           {shipment.currentLocation && (
-            <div className="lg:col-span-3 animate-fadeIn mb-4 md:mb-0">
+            <div className="hidden md:block lg:col-span-3 animate-fadeIn mb-4 md:mb-0">
               <Card className="relative overflow-hidden border-2 border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group">
                 {/* Animated Background Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-purple-500/5 to-blue-500/5 group-hover:from-primary/10 group-hover:via-purple-500/10 group-hover:to-blue-500/10 transition-all duration-500"></div>
@@ -582,29 +582,31 @@ const TrackingPage = () => {
           </div>
         </div>
 
-        {/* Live Interactive Map */}
+        {/* Live Interactive Map - Optimized for mobile */}
         <div className="mt-6 lg:col-span-3">
           <Card className="shadow-lg hover:shadow-xl transition-shadow overflow-hidden animate-fadeIn">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-50 border-b border-gray-100">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-50 border-b border-gray-100 p-3 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-md">
-                      <MapPin className="h-5 w-5 text-white" />
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
+                      <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
-                    Live Package Tracking Map
+                    <span className="hidden sm:inline">Live Package Tracking Map</span>
+                    <span className="sm:hidden truncate">Tracking Map</span>
                   </CardTitle>
-                  <CardDescription className="mt-1 ml-12 font-medium">
+                  <CardDescription className="hidden sm:block mt-1 ml-12 font-medium">
                     Track your package journey in real-time with interactive map
                   </CardDescription>
                 </div>
-                <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full shadow-md">
+                {/* Hide Live Tracking badge on mobile */}
+                <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full shadow-md">
                   <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                   <span className="text-xs font-bold text-white">Live Tracking</span>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-2 sm:p-4 md:p-6">
               <ShipmentMap shipment={shipment} />
             </CardContent>
           </Card>

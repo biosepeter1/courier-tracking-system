@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 
 const LandingPage = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { scrollYProgress } = useScroll();
   const controls = useAnimation();
@@ -123,14 +124,17 @@ const LandingPage = () => {
         className="border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
       >
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <motion.div
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-          >
-            <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">CourierTrack</span>
-          </motion.div>
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              className="flex items-center space-x-2"
+            >
+              <Package className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold">CourierTrack</span>
+            </motion.div>
+          </Link>
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             {[
               { label: 'Pricing', to: '/pricing', delay: 0.1 },
@@ -178,7 +182,65 @@ const LandingPage = () => {
               </Button>
             </motion.div>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t bg-background"
+          >
+            <div className="container mx-auto px-4 py-4 space-y-3">
+              <Link
+                to="/pricing"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                to="/testimonials"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Testimonials
+              </Link>
+              <Link
+                to="/contact"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link
+                to="/services"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Services
+              </Link>
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                </Button>
+                <Button className="flex-1" asChild>
+                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </motion.header>
 
       {/* Hero Section */}
