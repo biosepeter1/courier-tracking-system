@@ -450,9 +450,9 @@ const TrackingPage = () => {
                 {shipment.history && shipment.history.length > 0 ? (
                   <div className="relative">
                     {/* Vertical Timeline Line with gradient */}
-                    <div className="absolute left-5 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-purple-400 to-gray-300 rounded-full shadow-sm"></div>
+                    <div className="absolute left-4 sm:left-5 top-0 bottom-0 w-0.5 sm:w-1 bg-gradient-to-b from-primary via-purple-400 to-gray-300 rounded-full shadow-sm"></div>
                     
-                    <div className="space-y-8">
+                    <div className="space-y-6 sm:space-y-8">
                       {shipment.history
                         .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                         .slice(0, isTimelineExpanded ? shipment.history.length : 3)
@@ -462,59 +462,61 @@ const TrackingPage = () => {
                           return (
                             <div 
                               key={item._id} 
-                              className={`relative flex items-start space-x-5 group animate-fadeIn`}
+                              className={`relative flex items-start space-x-3 sm:space-x-5 group animate-fadeIn`}
                               style={{ animationDelay: `${index * 100}ms` }}
                             >
                               {/* Timeline Node with pulse animation */}
                               <div className="relative z-10 flex-shrink-0">
                                 {isLatest && (
-                                  <div className="absolute inset-0 w-10 h-10 rounded-full bg-primary/30 animate-ping"></div>
+                                  <div className="absolute inset-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/30 animate-ping"></div>
                                 )}
-                                <div className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                <div className={`relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                                   isLatest 
-                                    ? 'bg-gradient-to-br from-primary via-purple-600 to-purple-700 shadow-xl ring-4 ring-primary/30 scale-110' 
+                                    ? 'bg-gradient-to-br from-primary via-purple-600 to-purple-700 shadow-xl ring-4 ring-primary/30 scale-105 sm:scale-110' 
                                     : isOldest
                                     ? 'bg-gradient-to-br from-gray-300 to-gray-400 shadow-md'
-                                    : 'bg-white border-3 border-primary/50 shadow-md group-hover:scale-110 group-hover:border-primary'
+                                    : 'bg-white border-2 sm:border-3 border-primary/50 shadow-md group-hover:scale-105 sm:group-hover:scale-110 group-hover:border-primary'
                                 }`}>
-                                  {getStatusIcon(item.status, !isLatest)}
+                                  <div className="scale-75 sm:scale-100">
+                                    {getStatusIcon(item.status, !isLatest)}
+                                  </div>
                                 </div>
                               </div>
                               
                               {/* Content Card with hover effects */}
                               <div className={`flex-1 min-w-0 pb-2 transform transition-all duration-300 ${
-                                isLatest ? 'scale-[1.02]' : 'group-hover:scale-[1.01]'
+                                isLatest ? 'scale-[1.01] sm:scale-[1.02]' : 'group-hover:scale-[1.01]'
                               }`}>
-                                <div className={`rounded-xl p-5 transition-all duration-300 group-hover:shadow-xl ${
+                                <div className={`rounded-lg sm:rounded-xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-xl ${
                                   isLatest 
                                     ? 'bg-gradient-to-br from-primary/15 via-purple-50 to-blue-50 border-2 border-primary/40 shadow-lg' 
                                     : 'bg-white border-2 border-gray-200 group-hover:border-primary/30 group-hover:bg-gradient-to-br group-hover:from-gray-50 group-hover:to-white shadow-md'
                                 }`}>
-                                  <div className="flex items-start justify-between mb-3">
+                                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-0 mb-3">
                                     <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <p className={`font-bold transition-colors ${
-                                          isLatest ? 'text-primary text-lg' : 'text-gray-900 text-base group-hover:text-primary'
+                                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <p className={`font-bold transition-colors text-sm sm:text-base lg:text-lg ${
+                                          isLatest ? 'text-primary' : 'text-gray-900 group-hover:text-primary'
                                         }`}>
                                           {item.status}
                                         </p>
                                         {isLatest && (
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md animate-pulse">
-                                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md animate-pulse">
+                                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-ping"></div>
                                             Latest
                                           </span>
                                         )}
                                       </div>
                                     </div>
-                                    <div className="text-right bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
-                                      <p className="text-xs text-gray-600 font-semibold">
+                                    <div className="text-left sm:text-right bg-white/80 backdrop-blur-sm rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 shadow-sm self-start sm:self-auto">
+                                      <p className="text-[10px] sm:text-xs text-gray-600 font-semibold">
                                         {new Date(item.updatedAt).toLocaleDateString('en-US', { 
                                           month: 'short', 
                                           day: 'numeric',
                                           year: 'numeric'
                                         })}
                                       </p>
-                                      <p className="text-xs text-primary font-medium">
+                                      <p className="text-[10px] sm:text-xs text-primary font-medium">
                                         {new Date(item.updatedAt).toLocaleTimeString('en-US', {
                                           hour: '2-digit',
                                           minute: '2-digit'
@@ -523,19 +525,19 @@ const TrackingPage = () => {
                                     </div>
                                   </div>
                                   
-                                  <div className="flex items-start gap-2 bg-white/80 backdrop-blur-sm rounded-lg p-3 group-hover:bg-white transition-all">
-                                    <MapPin className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                                    <div className="flex-1">
-                                      <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-0.5">Location</p>
-                                      <p className="text-base font-extrabold text-gray-900">{item.location}</p>
+                                  <div className="flex items-start gap-2 bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 group-hover:bg-white transition-all">
+                                    <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mt-0.5 text-primary flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[10px] sm:text-xs text-gray-600 font-bold uppercase tracking-wide mb-0.5">Location</p>
+                                      <p className="text-sm sm:text-base font-extrabold text-gray-900 break-words">{item.location}</p>
                                     </div>
                                   </div>
                                   
                                   {item.note && (
-                                    <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200 group-hover:border-primary/30 transition-colors">
+                                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t-2 border-dashed border-gray-200 group-hover:border-primary/30 transition-colors">
                                       <div className="flex items-start gap-2">
-                                        <Info className="h-3.5 w-3.5 mt-0.5 text-primary" />
-                                        <p className="text-sm text-gray-900 font-semibold leading-relaxed">{item.note}</p>
+                                        <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 mt-0.5 text-primary flex-shrink-0" />
+                                        <p className="text-xs sm:text-sm text-gray-900 font-semibold leading-relaxed break-words">{item.note}</p>
                                       </div>
                                     </div>
                                   )}
