@@ -113,7 +113,7 @@ export default function ContactPage() {
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
 <Button asChild size="lg"><Link to="/quote">Request a Quote</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/login">Track Shipment</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/track">Track Shipment</Link></Button>
             </div>
           </motion.div>
         </div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                   {success && (
                     <div className="sm:col-span-2 rounded-md border p-3 text-sm">
                       <span className="inline-flex items-center gap-2 text-green-700"><Check className="h-4 w-4" /> {success}</span>
-<div className="mt-2 text-xs text-muted-foreground">While you wait, you can <Link className="underline" to="/login">Track Your Shipment</Link> or <Link className="underline" to="/quote">Request a Quote</Link>.</div>
+<div className="mt-2 text-xs text-muted-foreground">While you wait, you can <Link className="underline" to="/track">Track Your Shipment</Link> or <Link className="underline" to="/quote">Request a Quote</Link>.</div>
                     </div>
                   )}
                 </form>
@@ -207,7 +207,7 @@ export default function ContactPage() {
       <section className="py-10 bg-muted/30 border-y">
         <div className="container mx-auto px-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card><CardContent className="p-5"><div className="font-semibold">Track Shipment</div><p className="text-sm text-muted-foreground">Real‑time updates</p><div className="mt-3"><Button asChild variant="ghost"><Link to="/login">Open Tracking</Link></Button></div></CardContent></Card>
+            <Card><CardContent className="p-5"><div className="font-semibold">Track Shipment</div><p className="text-sm text-muted-foreground">Real‑time updates</p><div className="mt-3"><Button asChild variant="ghost"><Link to="/track">Open Tracking</Link></Button></div></CardContent></Card>
             <Card><CardContent className="p-5"><div className="font-semibold">Request a Quote</div><p className="text-sm text-muted-foreground">Instant pricing tool</p><div className="mt-3"><Button asChild variant="ghost"><Link to="/pricing#quote">Get Quote</Link></Button></div></CardContent></Card>
             <Card><CardContent className="p-5"><div className="font-semibold">FAQs</div><p className="text-sm text-muted-foreground">Pricing questions answered</p><div className="mt-3"><Button asChild variant="ghost"><Link to="/pricing#faq">View FAQs</Link></Button></div></CardContent></Card>
             <Card><CardContent className="p-5"><div className="font-semibold">Live Chat</div><p className="text-sm text-muted-foreground">Connect with an agent</p><div className="mt-3"><Button variant="ghost" disabled>Coming Soon</Button></div></CardContent></Card>

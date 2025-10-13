@@ -88,11 +88,7 @@ function App() {
               </ProtectedRoute>
             } />
             
-            <Route path="/track" element={
-              <ProtectedRoute>
-                <TrackPackagePage />
-              </ProtectedRoute>
-            } />
+            <Route path="/track" element={<TrackPackagePage />} />
             
             <Route path="/create-shipment" element={
               <ProtectedRoute>

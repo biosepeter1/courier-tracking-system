@@ -69,7 +69,7 @@ export default function PricingPage() {
             <p className="text-muted-foreground mt-3">Choose from Air, Road, or Rail freight options tailored to your needs.</p>
             <div className="mt-6 flex items-center justify-center gap-3">
 <Button asChild size="lg"><Link to="/quote">Get Instant Quote</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/">Track Shipment</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/track">Track Shipment</Link></Button>
             </div>
           </motion.div>
         </div>

@@ -107,8 +107,9 @@ const LandingPage = () => {
 
   const handleTrack = (e) => {
     e.preventDefault();
-    // Redirect to login page when Track Package is clicked
-    navigate('/login');
+    if (trackingNumber.trim()) {
+      navigate(`/track/${trackingNumber.trim().toUpperCase()}`);
+    }
   };
 
   return (

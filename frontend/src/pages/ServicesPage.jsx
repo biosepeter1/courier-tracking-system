@@ -37,7 +37,7 @@ function ServicesPage() {
               <p className="text-muted-foreground mt-3 max-w-2xl">We deliver speed, safety, and reliability—no matter the distance.</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="group">
-                  <Link to="/login">
+                  <Link to="/track">
                     Track Shipment
                     <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -197,7 +197,7 @@ function ServicesPage() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg"><Link to="/quote">Request a Quote</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/login">Track Your Shipment</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/track">Track Your Shipment</Link></Button>
             </div>
           </div>
         </div>
