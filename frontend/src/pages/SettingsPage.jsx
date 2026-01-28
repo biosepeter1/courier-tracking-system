@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Lock, Bell, Shield, Eye, EyeOff } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Lock, Bell, Shield, Eye, EyeOff, Check, Key } from 'lucide-react'
 import { authAPI } from '../lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -7,6 +8,21 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Alert, AlertDescription } from '../components/ui/alert'
 import Layout from '../components/Layout'
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 const SettingsPage = () => {
   const [passwordData, setPasswordData] = useState({
@@ -79,211 +95,211 @@ const SettingsPage = () => {
 
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your account settings and preferences
-            </p>
-          </div>
+      <div className="relative min-h-screen bg-background/50 py-8">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground mt-1">Manage your account preferences and security</p>
+          </motion.div>
 
           {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </motion.div>
           )}
 
           {success && (
-            <Alert variant="success" className="mb-6">
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <Alert className="border-green-500/20 bg-green-500/10 text-green-600">
+                <Check className="h-4 w-4 mr-2" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            </motion.div>
           )}
 
-          <div className="space-y-6">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="space-y-6"
+          >
             {/* Change Password Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Lock className="h-5 w-5 mr-2" />
-                  Change Password
-                </CardTitle>
-                <CardDescription>
-                  Update your password to keep your account secure
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="currentPassword">Current Password *</Label>
-                    <div className="relative">
-                      <Input
-                        id="currentPassword"
-                        name="currentPassword"
-                        type={showPasswords.current ? 'text' : 'password'}
-                        value={passwordData.currentPassword}
-                        onChange={handleChange}
-                        required
-                        placeholder="Enter your current password"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('current')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
+            <motion.div variants={item}>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                      <Lock className="h-5 w-5" />
                     </div>
-                  </div>
+                    <span>Change Password</span>
+                  </CardTitle>
+                  <CardDescription className="ml-11">
+                    Update your password to keep your account secure
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="ml-11">
+                  <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-xl">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <div className="relative">
+                        <Key className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="currentPassword"
+                          name="currentPassword"
+                          type={showPasswords.current ? 'text' : 'password'}
+                          value={passwordData.currentPassword}
+                          onChange={handleChange}
+                          required
+                          placeholder="••••••••"
+                          className="pl-9 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility('current')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="newPassword">New Password *</Label>
-                    <div className="relative">
-                      <Input
-                        id="newPassword"
-                        name="newPassword"
-                        type={showPasswords.new ? 'text' : 'password'}
-                        value={passwordData.newPassword}
-                        onChange={handleChange}
-                        required
-                        placeholder="Enter your new password"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('new')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <div className="relative">
+                          <Key className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="newPassword"
+                            name="newPassword"
+                            type={showPasswords.new ? 'text' : 'password'}
+                            value={passwordData.newPassword}
+                            onChange={handleChange}
+                            required
+                            placeholder="••••••••"
+                            className="pl-9 pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('new')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <div className="relative">
+                          <Key className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type={showPasswords.confirm ? 'text' : 'password'}
+                            value={passwordData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            placeholder="••••••••"
+                            className="pl-9 pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('confirm')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Password must be at least 6 characters long
+
+                    <p className="text-xs text-muted-foreground">
+                      Password must be at least 6 characters long and include numbers/symbols for better security.
+                    </p>
+
+                    <div className="pt-2">
+                      <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+                        {loading ? 'Changing Password...' : 'Change Password'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Notification Preferences */}
+            <motion.div variants={item}>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                      <Bell className="h-5 w-5" />
+                    </div>
+                    <span>Notification Preferences</span>
+                  </CardTitle>
+                  <CardDescription className="ml-11">
+                    Manage how you receive updates about your shipments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="ml-11">
+                  <div className="p-6 rounded-xl border border-dashed border-border flex flex-col items-center justify-center text-center bg-muted/20">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                      <Bell className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-medium text-foreground">Notifications Coming Soon</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mt-1">
+                      We're building a comprehensive notification center. Soon you'll be able to customize email, SMS, and push alerts.
                     </p>
                   </div>
-
-                  <div>
-                    <Label htmlFor="confirmPassword">Confirm New Password *</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showPasswords.confirm ? 'text' : 'password'}
-                        value={passwordData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                        placeholder="Confirm your new password"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('confirm')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-                      {loading ? 'Changing Password...' : 'Change Password'}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Security Tips */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2" />
-                  Security Tips
-                </CardTitle>
-                <CardDescription>
-                  Keep your account secure with these best practices
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                        <span className="text-green-600 text-sm font-bold">✓</span>
+            <motion.div variants={item}>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl border-l-4 border-l-green-500/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                      <Shield className="h-5 w-5" />
+                    </div>
+                    <span>Security Recommendations</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { title: "Use a strong password", desc: "Combine letters, numbers, and symbols" },
+                      { title: "Don't reuse passwords", desc: "Use a unique password for this service" },
+                      { title: "Update regularly", desc: "Change your password every 3-6 months" },
+                      { title: "Keep it private", desc: "Never share your credentials with anyone" }
+                    ].map((tip, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                          <Check className="h-3 w-3 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{tip.title}</p>
+                          <p className="text-xs text-muted-foreground">{tip.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">Use a strong password</p>
-                      <p className="text-sm text-gray-500">Combine letters, numbers, and special characters</p>
-                    </div>
+                    ))}
                   </div>
-
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                        <span className="text-green-600 text-sm font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">Don't reuse passwords</p>
-                      <p className="text-sm text-gray-500">Use a unique password for this account</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                        <span className="text-green-600 text-sm font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">Update regularly</p>
-                      <p className="text-sm text-gray-500">Change your password every few months</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                        <span className="text-green-600 text-sm font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">Keep it private</p>
-                      <p className="text-sm text-gray-500">Never share your password with anyone</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notification Preferences (Coming Soon) */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Bell className="h-5 w-5 mr-2" />
-                  Notification Preferences
-                </CardTitle>
-                <CardDescription>
-                  Manage how you receive updates about your shipments
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">
-                    Notification preferences coming soon!
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    You'll be able to customize your email and push notification settings here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </Layout>

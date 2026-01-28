@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { User, Mail, Phone, MapPin, Calendar, Clock, Edit, Save, X, Camera, Upload } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { User, Mail, Phone, MapPin, Calendar, Clock, Edit, Save, X, Camera, Shield, CheckCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { authAPI } from '../lib/api'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -10,6 +11,21 @@ import { Textarea } from '../components/ui/textarea'
 import { Alert, AlertDescription } from '../components/ui/alert'
 import { formatDateTime } from '../lib/utils'
 import Layout from '../components/Layout'
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 const ProfilePage = () => {
   const { user, setUser } = useAuth()
@@ -77,27 +93,23 @@ const ProfilePage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
       if (!validTypes.includes(file.type)) {
         setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)')
         return
       }
 
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         setError('Image size must be less than 5MB')
         return
       }
 
-      // Create preview
       const reader = new FileReader()
       reader.onloadend = () => {
         setImagePreview(reader.result)
       }
       reader.readAsDataURL(file)
 
-      // Upload image
       handleImageUpload(file)
     }
   }
@@ -140,252 +152,223 @@ const ProfilePage = () => {
 
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your account information
-            </p>
-          </div>
+      <div className="relative min-h-screen bg-background/50 py-8">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
+            <p className="text-muted-foreground mt-1">Manage your profile and preferences</p>
+          </motion.div>
 
           {error && (
-            <Alert variant="destructive" className="mb-6 shadow-lg animate-fadeIn border-2">
-              <AlertDescription className="font-semibold">{error}</AlertDescription>
-            </Alert>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </motion.div>
           )}
 
           {success && (
-            <Alert className="mb-6 shadow-lg animate-fadeIn border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
-              <AlertDescription className="font-semibold text-green-800">{success}</AlertDescription>
-            </Alert>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <Alert className="border-green-500/20 bg-green-500/10 text-green-600">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            </motion.div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Profile Summary Card */}
-            <Card className="lg:col-span-1 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-primary/20 animate-fadeIn overflow-hidden">
-              <div className="h-32 bg-gradient-to-br from-primary via-purple-600 to-purple-700 relative">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-                  <div className="relative inline-block">
-                    <div className="w-28 h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-xl flex items-center justify-center">
-                      {getProfileImageUrl() ? (
-                        <img
-                          src={getProfileImageUrl()}
-                          alt={user?.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-purple-100 flex items-center justify-center">
-                          <User className="h-14 w-14 text-primary" />
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="absolute bottom-1 right-1 bg-gradient-to-br from-primary to-purple-600 text-white p-2.5 rounded-full hover:scale-110 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group"
-                      title="Upload profile image"
-                    >
-                      {uploadingImage ? (
-                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                      ) : (
-                        <Camera className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                      )}
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </div>
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Left Column: Profile Card */}
+            <motion.div variants={item} className="lg:col-span-1">
+              <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-xl sticky top-24">
+                <div className="h-32 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent relative">
+                  <div className="absolute inset-0 bg-grid-white/10" />
                 </div>
-              </div>
-              <CardContent className="pt-16 pb-6">
-                <div className="text-center mb-6">
-                  <h2 className="text-3xl font-extrabold text-gray-900 mb-2">{user?.name}</h2>
-                  <p className="text-base text-gray-800 mb-3 font-bold">{user?.email}</p>
-                  <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold shadow-md ${
-                    user?.role === 'admin' 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white' 
-                      : 'bg-gradient-to-r from-primary to-blue-600 text-white'
-                  }`}>
-                    {user?.role === 'admin' ? (
-                      <>
-                        <User className="h-3.5 w-3.5" />
-                        Administrator
-                      </>
-                    ) : (
-                      <>
-                        <User className="h-3.5 w-3.5" />
-                        User
-                      </>
-                    )}
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="bg-gradient-to-r from-primary/5 to-purple-50 rounded-lg p-4 hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center text-sm font-semibold text-gray-800">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-3">
-                        <Calendar className="h-4 w-4 text-white" />
+                <div className="px-6 pb-6 relative">
+                  <div className="-mt-16 mb-4 flex justify-center">
+                    <div className="relative group">
+                      <div className="h-32 w-32 rounded-2xl bg-card p-1 shadow-2xl ring-1 ring-border/50 overflow-hidden">
+                        {getProfileImageUrl() ? (
+                          <img
+                            src={getProfileImageUrl()}
+                            alt={user?.name}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted rounded-xl flex items-center justify-center">
+                            <User className="h-12 w-12 text-muted-foreground/50" />
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-700 font-bold uppercase tracking-wide mb-1">Member Since</p>
-                        <p className="font-extrabold text-gray-900 text-base">{formatDateTime(user?.createdAt)}</p>
-                      </div>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="absolute bottom-2 right-2 h-8 w-8 bg-primary text-primary-foreground rounded-lg shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                      >
+                        {uploadingImage ? (
+                          <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                        ) : (
+                          <Camera className="h-4 w-4" />
+                        )}
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
                     </div>
                   </div>
-                  {user?.lastLogin && (
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 hover:shadow-md transition-all duration-300">
-                      <div className="flex items-center text-sm font-semibold text-gray-800">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mr-3">
-                          <Clock className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-700 font-bold uppercase tracking-wide mb-1">Last Active</p>
-                          <p className="font-extrabold text-gray-900 text-base">{formatDateTime(user?.lastLogin)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Profile Details Card */}
-            <Card className="lg:col-span-2 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-primary/20 animate-fadeIn">
-              <CardHeader className="bg-gradient-to-r from-primary/5 via-purple-50 to-white border-b border-primary/10">
-                <div className="flex items-center justify-between">
+                  <div className="text-center mb-6">
+                    <h2 className="text-xl font-bold">{user?.name}</h2>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                      <Shield className="h-3 w-3 mr-1" />
+                      {user?.role === 'admin' ? 'Administrator' : 'Verified User'}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-6 border-t border-border/50">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-muted-foreground">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Member Since
+                      </div>
+                      <span className="font-medium">{formatDateTime(user?.createdAt).split(',')[0]}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-muted-foreground">
+                        <Clock className="h-4 w-4 mr-2" />
+                        Last Active
+                      </div>
+                      <span className="font-medium">{user?.lastLogin ? formatDateTime(user?.lastLogin).split(',')[0] : 'Now'}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Right Column: Edit Form */}
+            <motion.div variants={item} className="lg:col-span-2">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-md">
-                        <Edit className="h-5 w-5 text-white" />
-                      </div>
-                      Profile Information
-                    </CardTitle>
-                    <CardDescription className="mt-2 ml-12 font-bold text-gray-700">Update your personal details and contact information</CardDescription>
+                    <CardTitle>Profile Details</CardTitle>
+                    <CardDescription>Update your personal information</CardDescription>
                   </div>
                   {!isEditing && (
-                    <Button 
-                      className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
-                      onClick={() => setIsEditing(true)}
-                    >
+                    <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
                   )}
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {isEditing ? (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <Label htmlFor="name">Full Name *</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="Enter your full name"
-                      />
-                    </div>
+                </CardHeader>
+                <CardContent>
+                  {isEditing ? (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Full Name</Label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="name"
+                              name="name"
+                              value={formData.name}
+                              onChange={handleChange}
+                              className="pl-9"
+                              placeholder="John Doe"
+                            />
+                          </div>
+                        </div>
 
-                    <div>
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <div className="relative">
-                        <Phone className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-                        <Input
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="Enter your phone number"
-                          className="pl-10"
-                        />
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="phone"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handleChange}
+                              className="pl-9"
+                              placeholder="+1 (555) 000-0000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Shipping Address</Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Textarea
+                            id="address"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            className="pl-9 min-h-[100px] resize-none"
+                            placeholder="Enter your full shipping address"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4">
+                        <Button type="button" variant="ghost" onClick={handleCancel} disabled={loading}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={loading}>
+                          {loading ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email Address</Label>
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                            <Mail className="h-4 w-4 text-primary" />
+                            <span className="font-medium text-sm">{user?.email}</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider">Phone</Label>
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                            <Phone className="h-4 w-4 text-primary" />
+                            <span className="font-medium text-sm">{user?.phone || 'Not provided'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Address</Label>
+                        <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                          <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                          <span className="font-medium text-sm">{user?.address || 'Not provided'}</span>
+                        </div>
                       </div>
                     </div>
-
-                    <div>
-                      <Label htmlFor="address">Address</Label>
-                      <div className="relative">
-                        <MapPin className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-                        <Textarea
-                          id="address"
-                          name="address"
-                          value={formData.address}
-                          onChange={handleChange}
-                          placeholder="Enter your address"
-                          rows={3}
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 pt-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleCancel}
-                        disabled={loading}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={loading}>
-                        {loading ? (
-                          <>Saving...</>
-                        ) : (
-                          <>
-                            <Save className="h-4 w-4 mr-2" />
-                            Save Changes
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-primary/5 to-purple-50 rounded-lg p-4">
-                      <Label className="text-gray-700 font-bold text-sm uppercase tracking-wide mb-2 block">Email Address</Label>
-                      <div className="flex items-center mt-2">
-                        <Mail className="h-5 w-5 text-primary mr-3" />
-                        <p className="text-gray-900 font-bold text-base">{user?.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
-                      <Label className="text-gray-700 font-bold text-sm uppercase tracking-wide mb-2 block">Full Name</Label>
-                      <div className="flex items-center mt-2">
-                        <User className="h-5 w-5 text-blue-600 mr-3" />
-                        <p className="text-gray-900 font-bold text-base">{user?.name || 'Not provided'}</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
-                      <Label className="text-gray-700 font-bold text-sm uppercase tracking-wide mb-2 block">Phone Number</Label>
-                      <div className="flex items-center mt-2">
-                        <Phone className="h-5 w-5 text-purple-600 mr-3" />
-                        <p className="text-gray-900 font-bold text-base">{user?.phone || 'Not provided'}</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
-                      <Label className="text-gray-700 font-bold text-sm uppercase tracking-wide mb-2 block">Address</Label>
-                      <div className="flex items-start mt-2">
-                        <MapPin className="h-5 w-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
-                        <p className="text-gray-900 font-bold text-base leading-relaxed">{user?.address || 'Not provided'}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </Layout>

@@ -13,10 +13,23 @@ const geocodeCache = new Map()
  */
 export const geocodeLocation = async (location) => {
   if (!location) return null
+  const cacheKey = `geo_cache_${location.toLowerCase()}`
 
-  // Check cache first
+  // 1. Check Memory Cache
   if (geocodeCache.has(location)) {
     return geocodeCache.get(location)
+  }
+
+  // 2. Check LocalStorage
+  try {
+    const stored = localStorage.getItem(cacheKey)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      geocodeCache.set(location, parsed) // Sync to memory
+      return parsed
+    }
+  } catch (e) {
+    console.warn('LocalStorage error:', e)
   }
 
   try {
@@ -35,16 +48,21 @@ export const geocodeLocation = async (location) => {
     }
 
     const data = await response.json()
-    
+
     if (data && data.length > 0) {
       const result = {
         lat: parseFloat(data[0].lat),
         lon: parseFloat(data[0].lon)
       }
-      
-      // Cache the result
+
+      // Cache the result (Memory + LocalStorage)
       geocodeCache.set(location, result)
-      
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(result))
+      } catch (e) {
+        // Ignore quota errors
+      }
+
       return result
     }
 
@@ -62,7 +80,7 @@ export const geocodeLocation = async (location) => {
  */
 export const geocodeMultipleLocations = async (locations) => {
   const results = {}
-  
+
   for (const location of locations) {
     if (location) {
       // Add small delay between requests to respect rate limits
@@ -70,7 +88,7 @@ export const geocodeMultipleLocations = async (locations) => {
       results[location] = await geocodeLocation(location)
     }
   }
-  
+
   return results
 }
 
@@ -111,7 +129,7 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371 // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180
   const dLon = (lon2 - lon1) * Math.PI / 180
-  const a = 
+  const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2)

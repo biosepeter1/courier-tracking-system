@@ -12,6 +12,7 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ShipmentsPage = lazy(() => import('./pages/ShipmentsPage'))
 const CreateShipmentPage = lazy(() => import('./pages/CreateShipmentPage'))
 const UserCreateShipmentPage = lazy(() => import('./pages/UserCreateShipmentPage'))
 const AdminShipmentsPage = lazy(() => import('./pages/AdminShipmentsPage'))
@@ -63,80 +64,84 @@ function App() {
           }}
         />
         <Router>
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner className="h-8 w-8" /></div>}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/testimonials" element={<TestimonialsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/quote" element={<QuotePage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/debug" element={<DebugPage />} />
-            <Route path="/track/:trackingNumber" element={<TrackingPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/track" element={<TrackPackagePage />} />
-            
-            <Route path="/create-shipment" element={
-              <ProtectedRoute>
-                <UserCreateShipmentPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Admin Only Routes */}
-            <Route path="/admin/create" element={
-              <ProtectedRoute requireAdmin>
-                <CreateShipmentPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/shipments" element={
-              <ProtectedRoute requireAdmin>
-                <AdminShipmentsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/analytics" element={
-              <ProtectedRoute requireAdmin>
-                <AnalyticsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/messages" element={
-              <ProtectedRoute requireAdmin>
-                <MessagesPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all route */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
+          <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner className="h-8 w-8" /></div>}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/testimonials" element={<TestimonialsPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/quote" element={<QuotePage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/debug" element={<DebugPage />} />
+              <Route path="/track/:trackingNumber" element={<TrackingPage />} />
+
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/shipments" element={
+                <ProtectedRoute>
+                  <ShipmentsPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/create-shipment" element={
+                <ProtectedRoute>
+                  <UserCreateShipmentPage />
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Only Routes */}
+              <Route path="/admin/create" element={
+                <ProtectedRoute requireAdmin>
+                  <CreateShipmentPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/shipments" element={
+                <ProtectedRoute requireAdmin>
+                  <AdminShipmentsPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/analytics" element={
+                <ProtectedRoute requireAdmin>
+                  <AnalyticsPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/messages" element={
+                <ProtectedRoute requireAdmin>
+                  <MessagesPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              } />
+
+              {/* Catch all route */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </Router>
       </SocketProvider>
     </AuthProvider>

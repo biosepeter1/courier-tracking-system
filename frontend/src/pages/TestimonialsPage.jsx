@@ -19,9 +19,11 @@ import {
   Truck,
   Award as TrainIcon,
   X,
+  MessageSquare,
+  ArrowRight
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardHeader } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
 import { Select } from '../components/ui/select'
@@ -183,9 +185,8 @@ function Stars({ count = 5, interactive = false, onRate = null }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className={`h-4 w-4 transition-colors ${
-            i < count ? 'text-primary fill-primary' : 'text-muted-foreground'
-          } ${interactive ? 'cursor-pointer hover:text-primary' : ''}`}
+          className={`h-4 w-4 transition-all ${i < count ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30'
+            } ${interactive ? 'cursor-pointer hover:scale-110' : ''}`}
           onClick={() => interactive && onRate && onRate(i + 1)}
         />
       ))}
@@ -195,14 +196,14 @@ function Stars({ count = 5, interactive = false, onRate = null }) {
 
 function ServiceBadge({ service }) {
   const config = {
-    Air: { icon: Plane, color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    Road: { icon: Truck, color: 'bg-green-100 text-green-700 border-green-200' },
-    Rail: { icon: TrainIcon, color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    Air: { icon: Plane, color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+    Road: { icon: Truck, color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+    Rail: { icon: TrainIcon, color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
   }
   const { icon: Icon, color } = config[service] || config.Road
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${color}`}>
-      <Icon className="h-3 w-3" />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${color}`}>
+      <Icon className="h-3.5 w-3.5" />
       {service}
     </span>
   )
@@ -273,7 +274,7 @@ export default function TestimonialsPage() {
     if (!formData.name.trim()) errors.name = 'Please enter your name.'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Please enter a valid email.'
     if (!formData.testimonial.trim()) errors.testimonial = 'Please share your experience.'
-    if (formData.testimonial.length < 200) errors.testimonial = 'Please write at least 200 characters.'
+    if (formData.testimonial.length < 20) errors.testimonial = 'Please write at least 20 characters.'
     if (formData.testimonial.length > 800) errors.testimonial = 'Please keep it under 800 characters.'
     if (!formData.rating) errors.rating = 'Please select a rating.'
     if (!formData.consent) errors.consent = 'Please agree to have your testimonial published.'
@@ -301,23 +302,29 @@ export default function TestimonialsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       {/* Header */}
       <PublicHeader />
 
       {/* Hero / Summary */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/10" />
-        <div className="container mx-auto px-4 py-16 sm:py-20 relative">
+      <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
+        <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">What Our Customers Say</h1>
-            <p className="text-lg text-muted-foreground mt-3">
-              Real feedback from businesses and individuals who trust us with their shipments.
+            <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium text-muted-foreground backdrop-blur-sm bg-background/50 mb-6">
+              <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2" />
+              Trusted by Industry Leaders
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6">
+              What Our Customers Say
+            </h1>
+            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+              Real feedback from businesses and individuals who trust us with their shipments every day.
             </p>
 
             {/* Aggregate Rating */}
@@ -325,44 +332,30 @@ export default function TestimonialsPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex items-center justify-center gap-3 mt-6"
+              className="flex items-center justify-center gap-6 mt-8 p-4 rounded-2xl bg-muted/30 backdrop-blur-sm inline-flex border border-border/50"
             >
-              <div className="flex items-center gap-2">
-                <Star className="h-6 w-6 text-primary fill-primary" />
-                <span className="text-3xl font-bold">4.8</span>
-                <span className="text-muted-foreground">/ 5</span>
+              <div className="flex items-center gap-3">
+                <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+                <div>
+                  <div className="text-3xl font-bold leading-none">4.8</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Average Rating</div>
+                </div>
               </div>
-              <div className="h-8 w-px bg-border" />
-              <span className="text-muted-foreground">from 1,234 reviews</span>
+              <div className="h-10 w-px bg-border" />
+              <div className="text-left">
+                <div className="text-xl font-bold leading-none">1,234+</div>
+                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Verified Reviews</div>
+              </div>
             </motion.div>
 
-            {/* Client Logos */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex flex-wrap items-center justify-center gap-8 mt-8"
-            >
-              {clientLogos.map((logo, i) => (
-                <motion.div
-                  key={logo.name}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                  className={`text-sm font-semibold ${logo.color}`}
-                >
-                  {logo.name}
-                </motion.div>
-              ))}
-            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Verified Highlights Strip */}
-      <section className="py-8 bg-muted/30 border-y">
+      <section className="py-12 bg-muted/20 border-y">
         <div className="container mx-auto px-4">
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-3">
             {stats.map((stat, i) => {
               const Icon = stat.icon
               return (
@@ -372,14 +365,14 @@ export default function TestimonialsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-4 justify-center sm:justify-start"
                 >
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className="h-14 w-14 rounded-2xl bg-background shadow-sm border flex items-center justify-center">
+                    <Icon className="h-7 w-7 text-primary" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    <div className="text-3xl font-bold tracking-tight">{stat.value}</div>
+                    <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
                   </div>
                 </motion.div>
               )
@@ -389,86 +382,97 @@ export default function TestimonialsPage() {
       </section>
 
       {/* Featured Testimonials Carousel */}
-      <section className="py-12">
+      <section className="py-20 overflow-hidden">
         <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-8"
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold">Featured Success Stories</h2>
-            <p className="text-muted-foreground mt-2">
-              Hear from industry leaders who transformed their logistics with CourierTrack
+          <div className="mb-12 text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Featured Success Stories</h2>
+            <p className="text-muted-foreground text-lg">
+              Hear from industry leaders who transformed their logistics with CourierTrack.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="relative max-w-4xl mx-auto">
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-lg">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative rounded-[2.5rem] border bg-card shadow-2xl overflow-hidden min-h-[400px] flex items-center">
+              <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                <Quote className="h-64 w-64 rotate-12" />
+              </div>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.3 }}
-                  className="p-8 sm:p-12"
+                  transition={{ duration: 0.4, ease: "circOut" }}
+                  className="p-8 sm:p-16 w-full relative z-10"
                 >
                   {featuredTestimonials[currentSlide] && (
-                    <>
-                      <Quote className="h-12 w-12 text-primary/30 mb-4" />
-                      <p className="text-xl sm:text-2xl font-medium mb-6">
-                        "{featuredTestimonials[currentSlide].quote}"
-                      </p>
-                      <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
-                            {featuredTestimonials[currentSlide].name.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-semibold flex items-center gap-2">
-                              {featuredTestimonials[currentSlide].name}
-                              {featuredTestimonials[currentSlide].verified && (
-                                <BadgeCheck className="h-4 w-4 text-primary" />
-                              )}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {featuredTestimonials[currentSlide].role}, {featuredTestimonials[currentSlide].company}
-                            </div>
-                          </div>
+                    <div className="grid md:grid-cols-[1fr,300px] gap-12 items-center">
+                      <div className="space-y-8">
+                        <div className="flex gap-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                          ))}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <ServiceBadge service={featuredTestimonials[currentSlide].service} />
-                          <Stars count={featuredTestimonials[currentSlide].rating} />
+                        <blockquote className="text-2xl sm:text-3xl font-medium leading-relaxed">
+                          "{featuredTestimonials[currentSlide].quote}"
+                        </blockquote>
+                        <div>
+                          <div className="font-bold text-xl flex items-center gap-2">
+                            {featuredTestimonials[currentSlide].name}
+                            {featuredTestimonials[currentSlide].verified && (
+                              <BadgeCheck className="h-5 w-5 text-blue-500" />
+                            )}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {featuredTestimonials[currentSlide].role}, {featuredTestimonials[currentSlide].company}
+                          </div>
                         </div>
                       </div>
-                    </>
+
+                      <div className="bg-muted/50 rounded-2xl p-6 border border-border/50">
+                        <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Shipment Details</h4>
+                        <div className="space-y-4 text-sm">
+                          <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                            <span className="text-muted-foreground">Service</span>
+                            <ServiceBadge service={featuredTestimonials[currentSlide].service} />
+                          </div>
+                          <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                            <span className="text-muted-foreground">Route</span>
+                            <span className="font-medium">{featuredTestimonials[currentSlide].route}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Weight</span>
+                            <span className="font-medium">{featuredTestimonials[currentSlide].weight}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </motion.div>
               </AnimatePresence>
             </div>
 
             {/* Carousel Controls */}
-            <div className="flex items-center justify-center gap-4 mt-6">
+            <div className="flex items-center justify-center gap-6 mt-10">
               <Button
                 variant="outline"
                 size="icon"
+                className="rounded-full h-12 w-12 border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 onClick={() =>
                   setCurrentSlide((prev) => (prev - 1 + featuredTestimonials.length) % featuredTestimonials.length)
                 }
                 aria-label="Previous testimonial"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </Button>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {featuredTestimonials.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentSlide(i)}
-                    className={`h-2 rounded-full transition-all ${
-                      i === currentSlide ? 'w-8 bg-primary' : 'w-2 bg-muted-foreground/30'
-                    }`}
+                    className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-10 bg-primary' : 'w-2 bg-muted hover:bg-primary/30'
+                      }`}
                     aria-label={`Go to slide ${i + 1}`}
                   />
                 ))}
@@ -477,131 +481,93 @@ export default function TestimonialsPage() {
               <Button
                 variant="outline"
                 size="icon"
+                className="rounded-full h-12 w-12 border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 onClick={() => setCurrentSlide((prev) => (prev + 1) % featuredTestimonials.length)}
                 aria-label="Next testimonial"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-
       {/* Testimonial Grid with Filters */}
-      <section className="py-12">
+      <section className="py-20 bg-muted/10">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8"
+            className="text-center mb-10"
           >
-            <h2 className="text-2xl font-bold">All Customer Reviews</h2>
-            <p className="text-muted-foreground mt-2">Filter by service, rating, or industry</p>
+            <h2 className="text-3xl font-bold mb-4">All Customer Reviews</h2>
+            <p className="text-muted-foreground text-lg">Filter by service, rating, or industry to find relevant feedback.</p>
           </motion.div>
 
           {/* Filters */}
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="max-w-6xl mx-auto mb-10 sticky top-20 z-20 bg-background/80 backdrop-blur-md p-4 rounded-2xl border shadow-sm">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12 items-center">
               {/* Search */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search reviews (e.g., fragile, express)"
+                    placeholder="Search reviews..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 bg-muted/30 border-transparent focus:bg-background transition-all"
                   />
                 </div>
               </div>
 
-              {/* Service Filter */}
-              <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
-                <option value="All">All Services</option>
-                <option value="Air">Air Freight</option>
-                <option value="Road">Road Logistics</option>
-                <option value="Rail">Rail Freight</option>
-              </Select>
+              {/* Filters Group */}
+              <div className="lg:col-span-8 flex flex-wrap gap-2 lg:justify-end">
+                <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
+                  <option value="All">All Services</option>
+                  <option value="Air">Air Freight</option>
+                  <option value="Road">Road Logistics</option>
+                  <option value="Rail">Rail Freight</option>
+                </Select>
 
-              {/* Rating Filter */}
-              <Select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)}>
-                <option value="All">All Ratings</option>
-                <option value="5★">5★ Only</option>
-                <option value="4★+">4★ and up</option>
-                <option value="3★+">3★ and up</option>
-              </Select>
+                <Select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)}>
+                  <option value="All">All Ratings</option>
+                  <option value="5★">5★ Only</option>
+                  <option value="4★+">4★ and up</option>
+                  <option value="3★+">3★ and up</option>
+                </Select>
 
-              {/* Industry Filter */}
-              <Select value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
-                <option value="All">All Industries</option>
-                <option value="eCommerce">eCommerce</option>
-                <option value="Manufacturing">Manufacturing</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="SMEs">SMEs</option>
-              </Select>
-            </div>
+                <Select value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
+                  <option value="All">All Industries</option>
+                  <option value="eCommerce">eCommerce</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="SMEs">SMEs</option>
+                </Select>
 
-            {/* Active Filters Display */}
-            {(serviceFilter !== 'All' || ratingFilter !== 'All' || industryFilter !== 'All' || searchQuery) && (
-              <div className="flex flex-wrap items-center gap-2 mt-4">
-                <span className="text-sm text-muted-foreground">Active filters:</span>
-                {serviceFilter !== 'All' && (
-                  <button
-                    onClick={() => setServiceFilter('All')}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary hover:bg-primary/20"
+                {(serviceFilter !== 'All' || ratingFilter !== 'All' || industryFilter !== 'All' || searchQuery) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setServiceFilter('All')
+                      setRatingFilter('All')
+                      setIndustryFilter('All')
+                      setSearchQuery('')
+                    }}
+                    className="text-muted-foreground hover:text-red-500"
                   >
-                    {serviceFilter}
-                    <X className="h-3 w-3" />
-                  </button>
+                    Clear Filters
+                  </Button>
                 )}
-                {ratingFilter !== 'All' && (
-                  <button
-                    onClick={() => setRatingFilter('All')}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary hover:bg-primary/20"
-                  >
-                    {ratingFilter}
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-                {industryFilter !== 'All' && (
-                  <button
-                    onClick={() => setIndustryFilter('All')}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary hover:bg-primary/20"
-                  >
-                    {industryFilter}
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary hover:bg-primary/20"
-                  >
-                    "{searchQuery}"
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setServiceFilter('All')
-                    setRatingFilter('All')
-                    setIndustryFilter('All')
-                    setSearchQuery('')
-                  }}
-                  className="text-xs text-muted-foreground hover:text-foreground underline"
-                >
-                  Clear all
-                </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Results Count */}
-          <div className="max-w-6xl mx-auto mb-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredTestimonials.length} of {allTestimonials.length} reviews
+          <div className="max-w-6xl mx-auto mb-6 flex justify-between items-center border-b pb-4">
+            <p className="text-sm font-medium text-muted-foreground">
+              Showing <span className="text-foreground font-bold">{filteredTestimonials.length}</span> results
             </p>
           </div>
 
@@ -615,48 +581,68 @@ export default function TestimonialsPage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card className="h-full hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-border/60 rounded-2xl group">
+                  <CardHeader className="p-6 pb-2">
+                    <div className="flex items-start justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-lg">
                           {testimonial.name.charAt(0)}
                         </div>
                         <div>
-                          <div className="font-semibold text-sm flex items-center gap-1">
+                          <div className="font-bold text-sm flex items-center gap-1.5">
                             {testimonial.name}
-                            {testimonial.verified && <BadgeCheck className="h-3 w-3 text-primary" />}
+                            {testimonial.verified && <BadgeCheck className="h-3.5 w-3.5 text-blue-500" />}
                           </div>
-                          <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                          <div className="text-xs text-muted-foreground font-medium">{testimonial.role}</div>
                         </div>
                       </div>
-                      <Stars count={testimonial.rating} />
+                      <div className="opacity-50 group-hover:opacity-100 transition-opacity">
+                        <Stars count={testimonial.rating} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-2">
                       <ServiceBadge service={testimonial.service} />
-                      <span className="text-xs text-muted-foreground">{testimonial.date}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{testimonial.date}</span>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {expandedCards.has(testimonial.id) ? testimonial.fullText : testimonial.quote}
-                    </p>
+                  <CardContent className="p-6 pt-2">
+                    <div className="relative">
+                      <Quote className="absolute -top-1 -left-1 h-6 w-6 text-muted-foreground/10 rotate-180" />
+                      <p className="text-sm text-muted-foreground/90 leading-relaxed pl-4 border-l-2 border-primary/20">
+                        {expandedCards.has(testimonial.id) ? testimonial.fullText : testimonial.quote}
+                      </p>
+                    </div>
+
                     {testimonial.fullText !== testimonial.quote && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <button
                         onClick={() => toggleExpanded(testimonial.id)}
-                        className="mt-2 p-0 h-auto text-primary hover:bg-transparent"
+                        className="mt-3 text-xs font-semibold text-primary hover:underline flex items-center"
                       >
                         {expandedCards.has(testimonial.id) ? 'Show less' : 'Read full review'}
-                      </Button>
+                      </button>
                     )}
+
                     {expandedCards.has(testimonial.id) && (
-                      <div className="mt-3 pt-3 border-t text-xs text-muted-foreground space-y-1">
-                        <div>Route: {testimonial.route}</div>
-                        <div>Weight: {testimonial.weight}</div>
-                        <div>Industry: {testimonial.industry}</div>
-                      </div>
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-4 pt-4 border-t border-dashed bg-muted/20 -mx-6 -mb-6 p-4 rounded-b-2xl"
+                      >
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-muted-foreground block">Route</span>
+                            <span className="font-medium">{testimonial.route}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground block">Weight</span>
+                            <span className="font-medium">{testimonial.weight}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground block">Industry</span>
+                            <span className="font-medium">{testimonial.industry}</span>
+                          </div>
+                        </div>
+                      </motion.div>
                     )}
                   </CardContent>
                 </Card>
@@ -669,95 +655,115 @@ export default function TestimonialsPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-12"
+              className="text-center py-20"
             >
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                No reviews match your filters. Try adjusting your search criteria.
+              <div className="h-20 w-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">No reviews found</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                No reviews match your specific filters. Try adjusting your search criteria or clearing filters.
               </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setServiceFilter('All')
+                  setRatingFilter('All')
+                  setIndustryFilter('All')
+                  setSearchQuery('')
+                }}
+              >
+                Clear All Filters
+              </Button>
             </motion.div>
           )}
         </div>
       </section>
 
       {/* Submit Testimonial Form */}
-      <section className="py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/5 -skew-y-3 origin-top-left transform scale-110"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-8"
+              className="text-center mb-10"
             >
-              <h2 className="text-2xl font-bold">Share Your Experience</h2>
-              <p className="text-muted-foreground mt-2">Help Others Ship Smarter — Submit Your Review</p>
+              <h2 className="text-3xl font-bold mb-4">Share Your Experience</h2>
+              <p className="text-muted-foreground text-lg">Help others ship smarter. Your feedback drives our innovation.</p>
             </motion.div>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden backdrop-blur-sm bg-background/80">
+              <CardContent className="p-8 sm:p-10">
                 {formSubmitted ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
+                    className="text-center py-12"
                   >
-                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                      <Check className="h-8 w-8 text-green-600" />
+                    <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                      <Check className="h-10 w-10 text-green-600" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Thanks for Your Feedback!</h3>
-                    <p className="text-muted-foreground mb-4">
-                      We've received your testimonial and will verify it within 48 hours.
+                    <h3 className="text-2xl font-bold mb-3">Thanks for Your Feedback!</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                      We've received your testimonial and will verify it within 48 hours. Thank you for helping us improve.
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      We verify reviews to keep things honest — publication may take up to 48 hours.
-                    </p>
-                    <Button onClick={() => setFormSubmitted(false)} variant="outline" className="mt-6">
+                    <div className="p-4 bg-muted/50 rounded-xl max-w-sm mx-auto mb-8 text-sm text-muted-foreground">
+                      <ShieldCheck className="h-4 w-4 inline mr-2 text-primary" />
+                      We verify reviews to ensure authenticity.
+                    </div>
+                    <Button onClick={() => setFormSubmitted(false)} variant="outline" size="lg" className="rounded-full px-8">
                       Submit Another Review
                     </Button>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <Label htmlFor="name">Full Name *</Label>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="text-base font-semibold">Full Name <span className="text-red-500">*</span></Label>
                         <Input
                           id="name"
-                          placeholder="Enter your full name"
+                          className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background focus:border-primary transition-all"
+                          placeholder="Ex. John Doe"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         />
-                        {formErrors.name && <p className="text-xs text-red-600 mt-1">{formErrors.name}</p>}
+                        {formErrors.name && <p className="text-xs text-red-600 font-medium">{formErrors.name}</p>}
                       </div>
 
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-base font-semibold">Email Address <span className="text-red-500">*</span></Label>
                         <Input
                           id="email"
                           type="email"
-                          placeholder="Enter your email (we'll verify ownership)"
+                          className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background focus:border-primary transition-all"
+                          placeholder="john@company.com"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
-                        {formErrors.email && <p className="text-xs text-red-600 mt-1">{formErrors.email}</p>}
+                        {formErrors.email && <p className="text-xs text-red-600 font-medium">{formErrors.email}</p>}
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="company">Company (optional)</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="company" className="text-base font-semibold">Company Name (Optional)</Label>
                       <Input
                         id="company"
-                        placeholder="Company name (optional)"
+                        className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background focus:border-primary transition-all"
+                        placeholder="Ex. Acme Logistics Ltd."
                         value={formData.company}
                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       />
                     </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <Label htmlFor="service">Service Used *</Label>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="service" className="text-base font-semibold">Service Used <span className="text-red-500">*</span></Label>
                         <Select
                           id="service"
+                          className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background focus:border-primary transition-all"
                           value={formData.service}
                           onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                         >
@@ -767,67 +773,62 @@ export default function TestimonialsPage() {
                         </Select>
                       </div>
 
-                      <div>
-                        <Label>Your Rating *</Label>
-                        <div className="mt-2">
+                      <div className="space-y-2">
+                        <Label className="text-base font-semibold">Your Rating <span className="text-red-500">*</span></Label>
+                        <div className="h-12 flex items-center px-4 rounded-xl bg-muted/30 border border-transparent">
                           <Stars
                             count={formData.rating}
                             interactive
                             onRate={(rating) => setFormData({ ...formData, rating })}
                           />
+                          <span className="ml-3 text-sm font-bold text-muted-foreground">{formData.rating}/5</span>
                         </div>
-                        {formErrors.rating && <p className="text-xs text-red-600 mt-1">{formErrors.rating}</p>}
+                        {formErrors.rating && <p className="text-xs text-red-600 font-medium">{formErrors.rating}</p>}
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="testimonial">Your Testimonial *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="testimonial" className="text-base font-semibold">Your Review <span className="text-red-500">*</span></Label>
                       <Textarea
                         id="testimonial"
-                        placeholder="Tell us about your experience (200–800 characters)"
-                        rows={6}
+                        className="min-h-[150px] rounded-xl bg-muted/30 border-transparent focus:bg-background focus:border-primary transition-all resize-y p-4"
+                        placeholder="Share details about your shipping experience, delivery speed, and customer service..."
                         value={formData.testimonial}
                         onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
                       />
-                      <div className="flex justify-between mt-1">
-                        {formErrors.testimonial && (
-                          <p className="text-xs text-red-600">{formErrors.testimonial}</p>
+                      <div className="flex justify-between mt-1 px-1">
+                        {formErrors.testimonial ? (
+                          <p className="text-xs text-red-600 font-medium">{formErrors.testimonial}</p>
+                        ) : (
+                          <span></span>
                         )}
-                        <p className="text-xs text-muted-foreground ml-auto">
-                          {formData.testimonial.length} / 800 characters
+                        <p className={`text-xs font-medium ${formData.testimonial.length > 800 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                          {formData.testimonial.length} / 800
                         </p>
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="upload" className="flex items-center gap-2 cursor-pointer">
-                        <Upload className="h-4 w-4" />
-                        Upload Photo / Video (optional, max 50MB)
-                      </Label>
-                      <Input id="upload" type="file" accept="image/*,video/*" className="mt-2" />
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-start gap-3">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="consent"
+                            type="checkbox"
+                            checked={formData.consent}
+                            onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                        </div>
+                        <label htmlFor="consent" className="text-sm text-muted-foreground leading-tight">
+                          I confirm that this review is based on my genuine experience and I authorize CourierTrack to publish this testimonial.
+                        </label>
+                      </div>
+                      {formErrors.consent && <p className="text-xs text-red-600 font-medium ml-7">{formErrors.consent}</p>}
                     </div>
 
-                    <div className="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        id="consent"
-                        checked={formData.consent}
-                        onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
-                        className="mt-1"
-                      />
-                      <Label htmlFor="consent" className="text-sm cursor-pointer">
-                        I agree to have my testimonial published (name/company may be shown). *
-                      </Label>
-                    </div>
-                    {formErrors.consent && <p className="text-xs text-red-600">{formErrors.consent}</p>}
-
-                    <Button type="submit" size="lg" className="w-full sm:w-auto">
-                      Submit Testimonial
+                    <Button type="submit" size="lg" className="w-full h-14 rounded-xl text-lg font-bold shadow-lg hover:shadow-primary/25 transition-all">
+                      Submit Review <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-
-                    <p className="text-xs text-muted-foreground">
-                      We verify reviews to keep things honest — publication may take up to 48 hours.
-                    </p>
                   </form>
                 )}
               </CardContent>
@@ -836,134 +837,28 @@ export default function TestimonialsPage() {
         </div>
       </section>
 
-      {/* Trust & CTA Panel */}
-      <section className="py-12">
+      {/* Footer */}
+      <footer className="border-t py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            {/* Trust Badges */}
-            <div className="grid gap-6 sm:grid-cols-3 mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-center"
-              >
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <ShieldCheck className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold">Verified Reviews</h3>
-                <p className="text-sm text-muted-foreground">All reviews verified by email</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="text-center"
-              >
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <CreditCard className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold">Secure Payments</h3>
-                <p className="text-sm text-muted-foreground">PCI-DSS compliant processing</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="text-center"
-              >
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <BadgeCheck className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold">SLA-Backed Delivery</h3>
-                <p className="text-sm text-muted-foreground">98% on-time guarantee</p>
-              </motion.div>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                <Package className="h-6 w-6" />
+              </div>
+              <span className="text-xl font-bold">CourierTrack</span>
             </div>
 
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border bg-gradient-to-r from-primary/10 to-primary/5 p-8 text-center"
-            >
-              <h3 className="text-2xl font-bold mb-2">Ready to Experience World-Class Logistics?</h3>
-              <p className="text-muted-foreground mb-6">
-                Join 1,200+ satisfied customers shipping smarter across Air, Road, and Rail.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button asChild size="lg">
-                  <Link to="/quote">Request a Quote</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link to="/contact">Contact Support</Link>
-                </Button>
-              </div>
-            </motion.div>
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground font-medium">
+              <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link to="/contact" className="hover:text-primary transition-colors">Contact Support</Link>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} CourierTrack. All rights reserved.
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Footer */}
-      <motion.footer
-        className="border-t py-8 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <motion.div
-              className="flex items-center space-x-2 mb-4 md:mb-0"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Package className="h-6 w-6 text-primary" />
-              <span className="font-semibold">CourierTrack</span>
-            </motion.div>
-            <motion.div
-              className="flex space-x-6 text-sm text-muted-foreground"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              {['Privacy Policy', 'Terms of Service', 'Contact Us'].map((item, index) => (
-                <motion.a
-                  key={item}
-                  href="#"
-                  className="hover:text-foreground transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  {item}
-                </motion.a>
-              ))}
-            </motion.div>
-          </div>
-          <motion.div
-            className="mt-4 pt-4 border-t text-center text-sm text-muted-foreground"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            © {new Date().getFullYear()} CourierTrack. All rights reserved.
-          </motion.div>
-        </div>
-      </motion.footer>
-
+      </footer>
     </div>
   )
 }

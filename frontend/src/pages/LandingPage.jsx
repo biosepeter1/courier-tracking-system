@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
 import { motion, useScroll, useAnimation, useInView } from 'framer-motion';
 import {
   Search,
@@ -19,6 +18,8 @@ import {
   ArrowRight,
   Plane,
   Menu,
+  BarChart,
+  Navigation
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -43,32 +44,40 @@ const LandingPage = () => {
   const rand = (min, max) => Math.random() * (max - min) + min;
 
   const genRoute = () => {
-    // Keep a margin so control points stay inside the view box
     const marginX = 24;
     const marginY = 32;
-    const from = { x: rand(marginX, VIEW_W - marginX), y: rand(marginY, VIEW_H - marginY) };
-    const to = { x: rand(marginX, VIEW_W - marginX), y: rand(marginY, VIEW_H - marginY) };
-    // Control points to make a nice curve between from and to
-    const c1 = { x: (from.x + to.x) / 2 + rand(-60, 60), y: rand(marginY, VIEW_H / 2) };
-    const c2 = { x: (from.x + to.x) / 2 + rand(-60, 60), y: rand(VIEW_H / 2, VIEW_H - marginY) };
+    // Smoother arc - less randomness
+    const from = { x: rand(marginX, 80), y: rand(150, 220) };
+    const to = { x: rand(320, VIEW_W - marginX), y: rand(150, 220) };
+    // Control points for a nice arc
+    const c1 = { x: from.x + 50, y: rand(20, 80) };
+    const c2 = { x: to.x - 50, y: rand(20, 80) };
+
     const d = `M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
-    const duration = rand(6, 12); // seconds
+    const duration = rand(6, 8);
     return { d, from, to, key: Date.now(), duration };
   };
 
-  // Timed status progression within a leg
   const timersRef = useRef([]);
   const scheduleStatuses = (durationSec) => {
-    // Clear existing timers
     timersRef.current.forEach((id) => clearTimeout(id));
     timersRef.current = [];
-    // Start at Picked Up
     setStatusIdx(0);
-    // Move to In Transit after ~1.2s
-    timersRef.current.push(setTimeout(() => setStatusIdx(1), 1200));
-    // Move to Out for Delivery near the end of the leg
-    const lastPhaseMs = Math.max(1500, (durationSec * 1000) - 2000);
-    timersRef.current.push(setTimeout(() => setStatusIdx(2), lastPhaseMs));
+
+    // Calculate timing for each step
+    const stepDuration = (durationSec * 1000) / 4;
+
+    // Step through all 4 statuses
+    timersRef.current.push(setTimeout(() => setStatusIdx(1), stepDuration));       // In Transit
+    timersRef.current.push(setTimeout(() => setStatusIdx(2), stepDuration * 2));   // Out for Delivery
+    timersRef.current.push(setTimeout(() => setStatusIdx(3), stepDuration * 3));   // Delivered
+
+    // Loop: Reset after showing "Delivered" for a moment
+    timersRef.current.push(setTimeout(() => {
+      setStatusIdx(0);
+      // Restart the animation cycle
+      setTimeout(() => scheduleStatuses(durationSec), 500);
+    }, stepDuration * 4));
   };
 
   useEffect(() => {
@@ -80,7 +89,6 @@ const LandingPage = () => {
     };
   }, []);
 
-  // Reschedule statuses whenever a new route is set
   useEffect(() => {
     if (route && route.key) {
       scheduleStatuses(route.duration || 8);
@@ -96,15 +104,6 @@ const LandingPage = () => {
     }
   }, [controls, inView]);
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
-    },
-  };
-
   const handleTrack = (e) => {
     e.preventDefault();
     if (trackingNumber.trim()) {
@@ -113,79 +112,52 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-primary z-50 origin-left"
+        className="fixed top-0 left-0 right-0 h-1 bg-primary z-[100] origin-left"
         style={{ scaleX: scrollYProgress }}
       />
+
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
-        className="border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
+        className="fixed top-0 left-0 right-0 border-b bg-background/80 backdrop-blur-md z-50 transition-all duration-300"
       >
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="flex items-center space-x-2"
-            >
-              <Package className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">CourierTrack</span>
-            </motion.div>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary text-primary-foreground">
+              <Package className="h-6 w-6" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">CourierTrack</span>
           </Link>
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+
+          <nav className="hidden md:flex items-center space-x-8">
             {[
-              { label: 'Pricing', to: '/pricing', delay: 0.1 },
-              { label: 'Testimonials', to: '/testimonials', delay: 0.15 },
-              { label: 'Contact', to: '/contact', delay: 0.2 },
-            ].map((link) => (
-              <motion.div
-                key={link.label}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: link.delay }}
-                whileHover={{ scale: 1.05 }}
+              { label: 'Services', to: '/services' },
+              { label: 'Pricing', to: '/pricing' },
+              { label: 'Testimonials', to: '/testimonials' },
+              { label: 'Contact', to: '/contact' },
+            ].map((link, i) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Link to={link.to} className="text-muted-foreground hover:text-foreground">
-                  {link.label}
-                </Link>
-              </motion.div>
+                {link.label}
+              </Link>
             ))}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Link to="/services" className="text-muted-foreground hover:text-foreground">Services</Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Button variant="outline" asChild>
+            <div className="flex items-center gap-3 pl-4 border-l">
+              <Button variant="ghost" asChild className="hover:bg-muted">
                 <Link to="/login">Login</Link>
               </Button>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.05 }}
-            >
               <Button asChild>
                 <Link to="/register">Sign Up</Link>
               </Button>
-            </motion.div>
+            </div>
           </nav>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
@@ -195,7 +167,7 @@ const LandingPage = () => {
           </button>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile menu */}
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -204,40 +176,22 @@ const LandingPage = () => {
             className="md:hidden border-t bg-background"
           >
             <div className="container mx-auto px-4 py-4 space-y-3">
-              <Link
-                to="/pricing"
-                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link
-                to="/testimonials"
-                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Testimonials
-              </Link>
-              <Link
-                to="/contact"
-                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              <Link
-                to="/services"
-                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <div className="flex gap-2 pt-2">
+              {['Services', 'Pricing', 'Testimonials', 'Contact'].map((item) => (
+                <Link
+                  key={item}
+                  to={`/${item.toLowerCase()}`}
+                  className="block px-4 py-3 text-sm font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </Link>
+              ))}
+              <div className="flex gap-3 pt-3 mt-3 border-t">
                 <Button variant="outline" className="flex-1" asChild>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                  <Link to="/login">Login</Link>
                 </Button>
                 <Button className="flex-1" asChild>
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+                  <Link to="/register">Sign Up</Link>
                 </Button>
               </div>
             </div>
@@ -246,348 +200,225 @@ const LandingPage = () => {
       </motion.header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, delay: 0.3 }}
-          className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
-        />
-        <div className="container mx-auto px-4 py-16 sm:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left */}
-            <motion.div ref={sectionRef} initial="hidden" animate={controls} variants={fadeInUp}>
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground mb-4"
-              >
-                <Zap className="h-3.5 w-3.5 text-primary" />
-                Lightning-fast courier delivery across the globe
-              </motion.div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6"
-              >
-                Reliable shipping for
-                <span className="mx-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">businesses</span>
-                and <span className="bg-gradient-to-r from-primary/80 to-primary bg-clip-text text-transparent">people</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="text-lg text-muted-foreground max-w-xl mb-8"
-              >
-                From instant pickups to real-time tracking and secure delivery, we make shipping effortless so you can focus on what matters.
-              </motion.p>
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-background">
+        {/* Subtle Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        </div>
 
-              {/* Tracking Form */}
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                onSubmit={handleTrack}
-                className="flex flex-col sm:flex-row gap-3 max-w-xl"
-              >
-                <Input
-                  placeholder="Enter tracking number..."
-                  value={trackingNumber}
-                  onChange={(e) => setTrackingNumber(e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="submit" size="lg" className="group">
-                  <Search className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Track Package
-                  <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </Button>
-              </motion.form>
-
-              {/* Trust signals */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1 }}
-                className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-muted-foreground"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="rounded-md border border-border p-3 text-center hover:border-primary/50 transition-colors"
-                >
-                  <Truck className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  10k+ daily deliveries
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="rounded-md border border-border p-3 text-center hover:border-primary/50 transition-colors"
-                >
-                  <Globe className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  50+ countries
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="rounded-md border border-border p-3 text-center hover:border-primary/50 transition-colors"
-                >
-                  <ShieldCheck className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  Insured packages
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="rounded-md border border-border p-3 text-center hover:border-primary/50 transition-colors"
-                >
-                  <Clock className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  On-time guarantee
-                </motion.div>
-              </motion.div>
-            </motion.div>
-            {/* Right visuals */}
+        <div className="container relative z-10 mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+            {/* Left Content */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="relative"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-center lg:text-left"
             >
-              <Card className="overflow-hidden shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Live Tracking Preview
-                    <motion.span
-                      animate={{ opacity: [1, 0.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="text-xs text-primary"
-                    >
-                      Live Demo
-                    </motion.span>
-                  </CardTitle>
-                  <CardDescription>Track your package in real-time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative h-64 rounded-md overflow-hidden bg-gradient-to-br from-muted to-background">
-                    {/* Status badge */}
-                    <motion.div
-                      className="absolute z-10 left-3 top-3 text-xs rounded-full px-2 py-1 bg-primary text-primary-foreground shadow"
-                      key={statusIdx}
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      Status: {statuses[statusIdx]}
-                    </motion.div>
-                    <div
-                      className="absolute inset-0 opacity-40"
-                      style={{
-                        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.06) 1px, transparent 1px)',
-                        backgroundSize: '20px 20px'
-                      }}
-                    />
+              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1] text-foreground">
+                Logistics that <br />
+                <span className="text-primary">move with you</span>.
+              </h1>
 
-                    <svg viewBox="0 0 400 256" className="absolute inset-0 w-full h-full">
-                      {/* Lat/Lon lines for map feel */}
-                      <g stroke="rgba(0,0,0,0.08)" strokeWidth="1" fill="none">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                          <path key={`lon-${i}`} d={`M ${50 + i*60} 0 C ${50 + i*60} 64, ${50 + i*60} 192, ${50 + i*60} 256`} />
-                        ))}
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <path key={`lat-${i}`} d={`M 0 ${40 + i*50} C 133 ${40 + i*50}, 267 ${40 + i*50}, 400 ${40 + i*50}`} />
-                        ))}
-                      </g>
-                      <defs>
-                        <linearGradient id="routeGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-                        </linearGradient>
-                      </defs>
-                      {/* Base glow route */}
-                      {/* Base glow route */}
-                      <path d={route.d || 'M 24 200 C 100 60 300 60 376 200'} stroke="rgba(255,255,255,0.4)" strokeWidth="8" fill="none" strokeLinecap="round" />
-                      {/* Colored route */}
-                      <path d={route.d || 'M 24 200 C 100 60 300 60 376 200'} stroke="url(#routeGradient)" strokeWidth="4" fill="none" strokeLinecap="round" />
-                      {/* Animated dash to imply movement */}
-                      <motion.path
-                        d={route.d || 'M 24 200 C 100 60 300 60 376 200'}
-                        stroke="currentColor"
-                        className="text-primary"
-                        strokeWidth="3"
-                        fill="none"
-                        strokeDasharray="12 10"
-                        animate={{ strokeDashoffset: [0, -88] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-                      />
-                    </svg>
+              <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Experience the future of shipping. Real-time tracking, AI-optimized routes, and 24/7 premium support.
+              </p>
 
-                    {/* Origin and destination pins */}
-                    <div
-                      className="absolute"
-                      style={{ left: `${((route.from.x || 24) / VIEW_W) * 100}%`, top: `${((route.from.y || 200) / VIEW_H) * 100}%`, transform: 'translate(-50%, -100%)' }}
-                    >
-                      <MapPin className="h-5 w-5 text-primary drop-shadow" />
-                      {statusIdx === 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
-                          animate={{ opacity: 1, y: -10, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="mt-1 -ml-2 inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-[10px] shadow border border-border"
-                        >
-                          <Package className="h-3 w-3 text-primary" />
-                          Picked Up
-                        </motion.div>
-                      )}
-                    </div>
-                    <div
-                      className="absolute"
-                      style={{ left: `${((route.to.x || 376) / VIEW_W) * 100}%`, top: `${((route.to.y || 200) / VIEW_H) * 100}%`, transform: 'translate(-50%, -100%)' }}
-                    >
-                      <MapPin className="h-5 w-5 text-primary drop-shadow" />
-                      {statusIdx === 3 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
-                          animate={{ opacity: 1, y: -10, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="mt-1 -ml-2 inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-[10px] shadow border border-border"
-                        >
-                          <Check className="h-3 w-3 text-primary" />
-                          Delivered
-                        </motion.div>
-                      )}
-                    </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <form onSubmit={handleTrack} className="flex-1 max-w-md relative flex items-center shadow-lg rounded-full bg-background border p-1 pl-4 transition-all focus-within:ring-2 ring-primary/20">
+                  <Search className="h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Enter tracking number..."
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    className="border-0 shadow-none bg-transparent focus-visible:ring-0 h-12 text-base px-4"
+                  />
+                  <Button type="submit" size="lg" className="rounded-full h-10 px-8">
+                    Track
+                  </Button>
+                </form>
+              </div>
 
-                    {/* Moving tracker plane along the path using CSS offset-path */}
-                    <motion.div
-                      key={route.key}
-                      className="absolute"
-                      style={{
-                        offsetPath: `path("${route.d || 'M 24 200 C 100 60 300 60 376 200'}")`,
-                        offsetRotate: 'auto'
-                      }}
-                      animate={{ offsetDistance: ['0%', '100%'] }}
-                      transition={{ duration: route.duration || 8, ease: 'linear' }}
-                      onAnimationComplete={() => {
-                        // Show Delivered badge briefly, then start a new leg
-                        setStatusIdx(3);
-                        setTimeout(() => {
-                          setRoute(genRoute());
-                        }, 1000);
-                      }}
-                    >
-                      <div className="-translate-x-1/2 -translate-y-1/2">
-                        <Plane className="h-5 w-5 text-primary drop-shadow" />
+              <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 text-sm font-medium text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-primary" /> Fully Insured
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" /> 24/7 Support
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" /> 150+ Countries
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Visual - Clean Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative w-full max-w-lg mx-auto lg:max-w-none hidden lg:block"
+            >
+              <Card className="relative overflow-hidden border shadow-xl bg-card text-card-foreground rounded-[2rem]">
+                <CardContent className="p-0">
+                  <div className="relative h-[400px] w-full p-6 flex flex-col">
+                    {/* Header of Card */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Package className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-base font-bold">Shipment #TRK-8829</div>
+                          <div className="text-sm text-muted-foreground">In Transit • 2.4kg</div>
+                        </div>
                       </div>
+                      <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs font-bold border border-green-500/20">
+                        ON TIME
+                      </div>
+                    </div>
+
+                    {/* Journey Tracker Visualization */}
+                    <div className="flex-1 relative rounded-xl overflow-hidden bg-muted/20 border shadow-inner flex flex-col justify-center px-6 py-8">
+                      {/* Status Float */}
                       <motion.div
-                        className="absolute inset-0 -m-3 rounded-full"
-                        animate={{ opacity: [0.5, 0, 0.5], scale: [1, 1.8, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                    </motion.div>
+                        className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur shadow-sm rounded-lg p-3 border"
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                      >
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Current Status</div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                          <span className="font-bold text-sm text-foreground">{statuses[statusIdx]}</span>
+                        </div>
+                      </motion.div>
+
+                      {/* Step-by-step Journey Tracker */}
+                      <div className="flex items-center justify-between w-full mt-8">
+                        {[
+                          { icon: Package, label: 'Pickup' },
+                          { icon: Truck, label: 'In Transit' },
+                          { icon: Navigation, label: 'Out for Delivery' },
+                          { icon: Check, label: 'Delivered' }
+                        ].map((step, index) => {
+                          const StepIcon = step.icon;
+                          const isCompleted = statusIdx >= index;
+                          const isCurrent = statusIdx === index;
+
+                          return (
+                            <React.Fragment key={step.label}>
+                              {/* Milestone Node */}
+                              <div className="flex flex-col items-center z-10">
+                                <motion.div
+                                  className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${isCompleted
+                                    ? 'bg-primary border-primary shadow-lg'
+                                    : 'bg-background border-muted-foreground/30'
+                                    } ${isCurrent ? 'ring-4 ring-primary/30 scale-110' : ''}`}
+                                  initial={{ scale: 0.8, opacity: 0 }}
+                                  animate={{ scale: isCurrent ? 1.1 : 1, opacity: 1 }}
+                                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                                >
+                                  <StepIcon className={`h-5 w-5 ${isCompleted ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                                </motion.div>
+                                <span className={`text-[10px] mt-2 font-medium text-center max-w-[60px] leading-tight ${isCompleted ? 'text-foreground' : 'text-muted-foreground'
+                                  }`}>
+                                  {step.label}
+                                </span>
+                              </div>
+
+                              {/* Connecting Line (except after last node) */}
+                              {index < 3 && (
+                                <div className="flex-1 h-1 bg-muted-foreground/20 rounded-full mx-1 relative overflow-hidden">
+                                  <motion.div
+                                    className="absolute inset-y-0 left-0 bg-primary rounded-full"
+                                    initial={{ width: '0%' }}
+                                    animate={{ width: statusIdx > index ? '100%' : '0%' }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                  />
+                                </div>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Timeline / Progress Bar */}
+                    <div className="mt-6">
+                      <div className="flex justify-between text-xs font-medium text-muted-foreground mb-2">
+                        <span>Started</span>
+                        <span>{Math.round((statusIdx / 3) * 100)}% Complete</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-primary"
+                          initial={{ width: "0%" }}
+                          animate={{ width: `${(statusIdx / 3) * 100}%` }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-              <motion.div
-                className="absolute -bottom-6 -left-6 w-56"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1 }}
-              >
-                <Card className="shadow-lg">
-                  <CardContent className="p-4">
-                    <motion.div
-                      className="text-sm text-muted-foreground"
-                      animate={{ opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      Average delivery time
-                    </motion.div>
-                    <motion.div
-                      className="text-2xl font-bold text-primary"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      24-48 hrs
-                    </motion.div>
-                  </CardContent>
-                </Card>
-              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stats strip */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="py-10 border-t border-border bg-muted/30"
-      >
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      {/* Stats Strip - Cleaner */}
+      <section className="relative px-4 -mt-10 lg:-mt-16 z-20">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border bg-card border shadow-xl rounded-2xl overflow-hidden"
+          >
             {[
-              { number: '250k+', label: 'Shipments delivered' },
-              { number: '8,000+', label: 'Active businesses' },
-              { number: '98%', label: 'On-time rate' },
-              { number: '4.9/5', label: 'Customer rating' },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <motion.div
-                  className="text-3xl font-extrabold text-primary"
-                  initial={{ scale: 0.5 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  {stat.number}
-                </motion.div>
-                <motion.div
-                  className="text-sm text-muted-foreground"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
-                  viewport={{ once: true }}
-                >
-                  {stat.label}
-                </motion.div>
-              </motion.div>
+              { number: '250k+', label: 'Delivered', icon: Package },
+              { number: '150+', label: 'Countries', icon: Globe },
+              { number: '99.9%', label: 'On Time', icon: Clock },
+              { number: '24/7', label: 'Support', icon: ShieldCheck },
+            ].map((stat, i) => (
+              <div key={i} className="p-6 text-center hover:bg-muted/30 transition-colors group">
+                <div className="mx-auto w-10 h-10 mb-3 bg-secondary rounded-full flex items-center justify-center text-primary">
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <div className="text-2xl md:text-3xl font-bold mb-1">{stat.number}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{stat.label}</div>
+              </div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Features */}
       <motion.section
         id="features"
-        className="py-16"
+        className="py-24"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
         <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl font-bold text-center mb-12"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Powerful features built for speed
-          </motion.h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-primary font-medium mb-3 uppercase tracking-wider text-xs">Why Choose Us</div>
+            <motion.h2
+              className="text-3xl sm:text-4xl font-bold mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Powerful features built for modern logistics
+            </motion.h2>
+            <p className="text-lg text-muted-foreground">Weve reimagined how shipping works, giving you total control and visibility.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Truck, title: 'Door-to-door pickup', desc: 'Schedule pickups at your convenience and we’ll handle the rest.' },
               { icon: Rocket, title: 'Express shipping', desc: 'Priority handling ensures your package gets there faster.' },
@@ -595,30 +426,22 @@ const LandingPage = () => {
               { icon: Globe, title: 'Global coverage', desc: 'Ship to 50+ countries with transparent customs support.' },
               { icon: Clock, title: 'Real-time tracking', desc: 'Know where your package is at every moment of the journey.' },
               { icon: Zap, title: 'Instant notifications', desc: 'Get SMS/email alerts at every delivery milestone.' },
-            // eslint-disable-next-line no-unused-vars
             ].map(({ icon: Icon, title, desc }, index) => (
               <motion.div
                 key={title}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ y: -5 }}
               >
-                <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <Card className="h-full border shadow-sm hover:shadow-lg transition-all duration-300 group">
                   <CardHeader>
-                    <motion.div
-                      className="h-10 w-10 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-3"
-                      whileHover={{
-                        scale: 1.2,
-                        rotate: 360,
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                       <Icon className="h-5 w-5" />
-                    </motion.div>
-                    <CardTitle className="text-lg">{title}</CardTitle>
-                    <CardDescription>{desc}</CardDescription>
+                    </div>
+                    <CardTitle className="text-lg mb-2">{title}</CardTitle>
+                    <CardDescription className="text-base">{desc}</CardDescription>
                   </CardHeader>
                 </Card>
               </motion.div>
@@ -628,520 +451,144 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Services/Pricing */}
-      <motion.section
-        id="services"
-        className="py-16 bg-muted/30"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl font-bold text-center mb-3"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Services that fit your needs
-          </motion.h2>
-          <motion.p
-            className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            From same-day to economy shipping, choose the service level that matches your timeline and budget.
-          </motion.p>
-          <div id="pricing" className="grid md:grid-cols-3 gap-6">
+      <section id="services" className="py-24 bg-muted/30 relative">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-lg text-muted-foreground">Choose the service speed that matches your business needs.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
-              { name: 'Standard', price: 'From $5', features: ['2-5 business days', 'Tracking updates', 'Doorstep delivery'] },
-              { name: 'Express', price: 'From $15', featured: true, features: ['1-2 business days', 'Priority handling', 'Extended support'] },
-              { name: 'Overnight', price: 'From $25', features: ['Next-day delivery', 'Highest priority', 'Early morning option'] },
+              { name: 'Standard', price: 'From $5', features: ['3-5 business days', 'Basic Tracking', 'Doorstep delivery'], color: 'border-border' },
+              { name: 'Express', price: 'From $15', featured: true, features: ['1-2 business days', 'Priority handling', 'Premium Support'], color: 'border-primary ring-1 ring-primary' },
+              { name: 'Overnight', price: 'From $25', features: ['Next-day delivery', 'Money-back guarantee', 'Early morning option'], color: 'border-border' },
             ].map((plan, index) => (
               <motion.div
                 key={plan.name}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
-                className="h-full"
+                className="relative"
               >
-                <Card className={`h-full transition-shadow duration-300 ${plan.featured ? 'border-primary shadow-lg hover:shadow-xl' : 'hover:shadow-md'}`}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>{plan.name}</CardTitle>
-                      {plan.featured && (
-                        <motion.span
-                          className="text-xs rounded-full px-2 py-1 bg-primary text-primary-foreground"
-                          animate={{ scale: [1, 1.1, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          Popular
-                        </motion.span>
-                      )}
-                    </div>
-                    <motion.div
-                      className="text-2xl font-extrabold"
-                      initial={{ scale: 0.8 }}
-                      whileInView={{ scale: 1 }}
-                      transition={{ duration: 0.3, delay: index * 0.2 + 0.3 }}
-                      viewport={{ once: true }}
-                    >
-                      {plan.price}
-                    </motion.div>
-                    <CardDescription>Transparent rates. No surprises.</CardDescription>
+                {plan.featured && (
+                  <div className="absolute -top-3 left-0 right-0 flex justify-center z-20">
+                    <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-md uppercase tracking-wider">Most Popular</span>
+                  </div>
+                )}
+                <Card className={`h-full ${plan.featured ? 'shadow-xl scale-105 z-10' : 'shadow-md'} ${plan.color} flex flex-col bg-card`}>
+                  <CardHeader className="text-center pb-8 pt-10">
+                    <CardTitle className="text-xl font-medium text-muted-foreground mb-2">{plan.name}</CardTitle>
+                    <div className="text-4xl font-extrabold text-foreground mb-4">{plan.price}</div>
+                    <p className="text-sm text-muted-foreground">per shipment</p>
                   </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 text-sm">
+                  <CardContent className="flex-1 flex flex-col">
+                    <ul className="space-y-4 mb-8 flex-1">
                       {plan.features.map((f, i) => (
-                        <motion.li
-                          key={f}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.2 + i * 0.1 }}
-                          viewport={{ once: true }}
-                          className="flex items-start gap-2"
-                        >
-                          <motion.div
-                            whileHover={{ scale: 1.2, rotate: 360 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <Check className="h-4 w-4 text-primary mt-0.5" />
-                          </motion.div>
+                        <li key={i} className="flex items-center gap-3 text-sm">
+                          <Check className="h-5 w-5 text-primary shrink-0" />
                           <span>{f}</span>
-                        </motion.li>
+                        </li>
                       ))}
                     </ul>
+                    <Button className={`w-full ${plan.featured ? '' : 'variant-outline'}`} variant={plan.featured ? 'default' : 'outline'} asChild>
+                      <Link to="/pricing">Choose {plan.name}</Link>
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
-          <motion.div
-            className="text-center mt-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Button asChild size="lg" className="group">
-                <Link to="/pricing">
-                  View All Pricing Plans
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </motion.div>
-          </motion.div>
         </div>
-      </motion.section>
+      </section>
 
       {/* How it works */}
-      <motion.section
-        id="how-it-works"
-        className="py-16"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
+      <section className="py-24 overflow-hidden">
         <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl font-bold text-center mb-12"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            How it works
-          </motion.h2>
-          <motion.div
-            className="grid md:grid-cols-4 gap-6 relative"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            {/* Progress Line */}
-            <motion.div
-              className="absolute top-7 left-0 right-0 h-0.5 bg-primary/20"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              transition={{ duration: 1, delay: 0.5 }}
-              viewport={{ once: true }}
-              style={{ transformOrigin: 'left' }}
-            />
-            {[
-              { step: 1, title: 'Create order', desc: 'Enter pickup and destination details.' },
-              { step: 2, title: 'We pick up', desc: 'A courier collects your package on time.' },
-              { step: 3, title: 'Track in real-time', desc: 'Follow your parcel on its journey.' },
-              { step: 4, title: 'Delivered safely', desc: 'Confirm delivery and rate your experience.' },
-            ].map(({ step, title, desc }, index) => (
-              <motion.div
-                key={step}
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-              >
-                <motion.div
-                  className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold relative z-10"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 10,
-                    delay: 0.5 + index * 0.1,
-                  }}
-                  viewport={{ once: true }}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  {step}
-                </motion.div>
-                <motion.h3
-                  className="font-semibold mb-1"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  {title}
-                </motion.h3>
-                <motion.p
-                  className="text-sm text-muted-foreground"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  {desc}
-                </motion.p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16">How it works</h2>
 
-      {/* Testimonials */}
-      <motion.section
-        id="testimonials"
-        className="py-16 bg-muted/30"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl font-bold text-center mb-12"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Loved by customers worldwide
-          </motion.h2>
-          <motion.div className="grid md:grid-cols-3 gap-6">
-            {[
-              { name: 'Amara U.', text: 'Super fast and reliable. The tracking updates kept me informed every step of the way.', rating: 5 },
-              { name: 'David O.', text: 'Amazing experience! Overnight option saved my project timeline.', rating: 5 },
-              { name: 'Lina K.', text: 'Great customer support and on-time delivery. Highly recommend!', rating: 4 },
-            ].map(({ name, text, rating }, index) => (
-              <motion.div
-                key={name}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-              >
-                <Card className="h-full shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <motion.div
-                          className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
-                          whileHover={{ scale: 1.2 }}
-                          transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                        >
-                          {name.charAt(0)}
-                        </motion.div>
-                        <motion.div
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                        >
-                          <div className="font-medium">{name}</div>
-                          <div className="text-xs text-muted-foreground">Business customer</div>
-                        </motion.div>
-                      </div>
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                      >
-                        <Quote className="h-5 w-5 text-primary" />
-                      </motion.div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <motion.p
-                      className="text-sm mb-3"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-                    >
-                      {text}
-                    </motion.p>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, scale: 0 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: 0.5 + index * 0.1 + i * 0.1 }}
-                          whileHover={{ scale: 1.2 }}
-                        >
-                          <Star className={`h-4 w-4 ${i < rating ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
+          <div className="relative">
+            {/* Line */}
+            <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-muted" />
 
-      {/* FAQ */}
-      <motion.section
-        id="faq"
-        className="py-16"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl font-bold text-center mb-10"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Frequently asked questions
-          </motion.h2>
-          <motion.div
-            className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto"
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.2,
-                },
-              },
-            }}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            {[
-              { q: 'Which countries do you ship to?', a: 'We currently ship to over 50 countries across Africa, Europe, and North America.' },
-              { q: 'How do I get a tracking number?', a: 'After creating a shipment, you will receive a unique tracking number via email and on your dashboard.' },
-              { q: 'Are packages insured?', a: 'Yes. All shipments include basic insurance, with optional add-ons for high-value items.' },
-              { q: 'What if I need to change the delivery address?', a: 'Contact support as soon as possible—address changes are possible prior to the "Out for Delivery" stage.' },
-            ].map(({ q, a }, index) => (
-              <motion.div
-                key={q}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0 },
-                }}
-                whileHover={{ scale: 1.02 }}
-                className="group"
-              >
-                <Card className="shadow-sm hover:shadow-md transition-all duration-300">
-                  <details className="group/item rounded-lg p-4">
-                    <summary className="flex items-center justify-between cursor-pointer list-none">
-                      <motion.span
-                        className="font-medium"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.1 + index * 0.1 }}
-                      >
-                        {q}
-                      </motion.span>
-                      <motion.div
-                        animate={{ rotate: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="group-open/item:rotate-180"
-                      >
-                        <ChevronDown className="h-4 w-4 text-primary transition-colors" />
-                      </motion.div>
-                    </summary>
-                    <motion.p
-                      className="mt-3 text-sm text-muted-foreground"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {a}
-                    </motion.p>
-                  </details>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* CTA Section */}
-      <motion.section
-        className="py-16 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground relative overflow-hidden"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        {/* Background Animations */}
-        <motion.div
-          className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 5, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/5 blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.1, 0.2],
-          }}
-          transition={{ duration: 5, repeat: Infinity }}
-        />
-        <div className="container mx-auto px-4 text-center relative">
-          <motion.h2
-            className="text-3xl sm:text-4xl font-bold mb-4"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Ready to ship with confidence?
-          </motion.h2>
-          <motion.p
-            className="text-xl mb-8 opacity-90"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            Join thousands of satisfied customers who trust us with their deliveries.
-          </motion.p>
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="lg" variant="secondary" asChild className="shadow-lg group">
-                <Link to="/register">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </Link>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-lg"
-                asChild
-              >
-                <Link to="/login">Login to Account</Link>
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Footer */}
-      <motion.footer
-        className="border-t py-8 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <motion.div
-              className="flex items-center space-x-2 mb-4 md:mb-0"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Package className="h-6 w-6 text-primary" />
-              <span className="font-semibold">CourierTrack</span>
-            </motion.div>
-            <motion.div
-              className="flex space-x-6 text-sm text-muted-foreground"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
+            <div className="grid md:grid-cols-4 gap-12 relative z-10">
               {[
-                { label: 'Privacy Policy', to: '/privacy' },
-                { label: 'Terms of Service', to: '/terms' },
-                { label: 'Contact Us', to: '/contact' }
-              ].map((item, index) => (
+                { step: 1, title: 'Book Order', desc: 'Enter shipment details and get an instant quote.' },
+                { step: 2, title: 'We Collect', desc: 'A courier picks up your package from your door.' },
+                { step: 3, title: 'Live Tracking', desc: 'Follow your shipment in real-time on our map.' },
+                { step: 4, title: 'Delivered', desc: 'Safe delivery with digital signature confirmation.' },
+              ].map((item, i) => (
                 <motion.div
-                  key={item.label}
-                  whileHover={{ scale: 1.1 }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.2 }}
+                  viewport={{ once: true }}
+                  className="text-center"
                 >
-                  <Link
-                    to={item.to}
-                    className="hover:text-foreground transition-colors"
-                  >
-                    {item.label}
-                  </Link>
+                  <div className="w-24 h-24 mx-auto bg-card border-4 border-muted rounded-full flex items-center justify-center mb-6 shadow-sm relative z-10">
+                    <span className="text-3xl font-bold text-primary">{item.step}</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm">{item.desc}</p>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden bg-primary">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 mix-blend-overlay"></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10 text-center text-primary-foreground">
           <motion.div
-            className="mt-4 pt-4 border-t text-center text-sm text-muted-foreground"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            © {new Date().getFullYear()} CourierTrack. All rights reserved.
+            <h2 className="text-4xl sm:text-5xl font-extrabold mb-6 tracking-tight">Ready to verify our speed?</h2>
+            <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">Join thousands of businesses who trust CourierTrack for their critical deliveries.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="xl" variant="secondary" className="h-14 px-8 text-lg rounded-full shadow-lg" asChild>
+                <Link to="/register">Get Started Now <ArrowRight className="ml-2 h-5 w-5" /></Link>
+              </Button>
+              <Button size="xl" className="h-14 px-8 text-lg rounded-full bg-white text-primary hover:bg-white/90 shadow-lg" asChild>
+                <Link to="/contact">Contact Sales</Link>
+              </Button>
+            </div>
           </motion.div>
         </div>
-      </motion.footer>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t py-12 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                <Package className="h-6 w-6" />
+              </div>
+              <span className="text-xl font-bold">CourierTrack</span>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
+              <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+              <Link to="/contact" className="hover:text-primary transition-colors">Help Center</Link>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} CourierTrack. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

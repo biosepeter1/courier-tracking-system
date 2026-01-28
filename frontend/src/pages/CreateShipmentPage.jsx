@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Package, User, Mail, Phone, MapPin, Calendar } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Package,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  ArrowRight,
+  Box,
+  Truck,
+  CheckCircle2,
+  AlertCircle,
+  Scale,
+  DollarSign,
+  FileText,
+  CreditCard
+} from 'lucide-react'
 import { shipmentAPI, authAPI } from '../lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -12,6 +29,22 @@ import { Select } from '../components/ui/select'
 import { Alert, AlertDescription } from '../components/ui/alert'
 import { DatePicker } from '../components/ui/datepicker'
 import Layout from '../components/Layout'
+import { cn } from '../lib/utils'
+
+const containerVideo = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVideo = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 const CreateShipmentPage = () => {
   const [formData, setFormData] = useState({
@@ -99,7 +132,7 @@ const CreateShipmentPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    
+
     if (name.includes('.')) {
       const [parent, child, grandchild] = name.split('.')
       if (grandchild) {
@@ -134,7 +167,7 @@ const CreateShipmentPage = () => {
     e.preventDefault()
     setError('')
     setSuccess('')
-    
+
     const toastId = toast.loading('Creating shipment...', {
       icon: '🚚',
     })
@@ -162,7 +195,7 @@ const CreateShipmentPage = () => {
       }
 
       // Only include packageDetails if at least one field has a value
-      const hasPackageDetails = 
+      const hasPackageDetails =
         formData.packageDetails.weight ||
         formData.packageDetails.value ||
         formData.packageDetails.description ||
@@ -172,7 +205,7 @@ const CreateShipmentPage = () => {
 
       if (hasPackageDetails) {
         shipmentData.packageDetails = {}
-        
+
         if (formData.packageDetails.weight) {
           shipmentData.packageDetails.weight = parseFloat(formData.packageDetails.weight)
         }
@@ -182,12 +215,12 @@ const CreateShipmentPage = () => {
         if (formData.packageDetails.description) {
           shipmentData.packageDetails.description = formData.packageDetails.description
         }
-        
-        const hasDimensions = 
+
+        const hasDimensions =
           formData.packageDetails.dimensions.length ||
           formData.packageDetails.dimensions.width ||
           formData.packageDetails.dimensions.height
-        
+
         if (hasDimensions) {
           shipmentData.packageDetails.dimensions = {}
           if (formData.packageDetails.dimensions.length) {
@@ -202,15 +235,14 @@ const CreateShipmentPage = () => {
         }
       }
 
-      // Debug: log the payload being sent
       console.log('Sending shipment data:', JSON.stringify(shipmentData, null, 2))
-      
+
       const response = await shipmentAPI.create(shipmentData)
-      
+
       if (response.data.success) {
         const trackingNumber = response.data.data.shipment.trackingNumber
         setSuccess(`Shipment created successfully! Tracking number: ${trackingNumber}`)
-        
+
         toast.success(
           <div>
             <div className="font-bold">Shipment Created! 🚀</div>
@@ -223,7 +255,7 @@ const CreateShipmentPage = () => {
             icon: '✅',
           }
         )
-        
+
         setTimeout(() => {
           navigate('/admin/shipments')
         }, 2000)
@@ -233,9 +265,8 @@ const CreateShipmentPage = () => {
       }
     } catch (err) {
       console.error('Create shipment error:', err)
-      
+
       let errorMessage = 'Failed to create shipment'
-      // Check if there are validation errors
       if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         errorMessage = err.response.data.errors.map(e => `${e.field}: ${e.message}`).join(', ')
         setError(`Validation failed: ${errorMessage}`)
@@ -243,7 +274,7 @@ const CreateShipmentPage = () => {
         errorMessage = err.response?.data?.message || 'Failed to create shipment'
         setError(errorMessage)
       }
-      
+
       toast.error(
         <div>
           <div className="font-bold">Failed to Create Shipment</div>
@@ -256,342 +287,413 @@ const CreateShipmentPage = () => {
     }
   }
 
+  const InputGroup = ({ icon: Icon, children, className }) => (
+    <div className={cn("relative", className)}>
+      <div className="absolute left-3 top-3 text-muted-foreground/50">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="[&>input]:pl-10 [&>textarea]:pl-10 [&>select]:pl-10">
+        {children}
+      </div>
+    </div>
+  )
+
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Create New Shipment</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Fill in the shipment details to create a new package for tracking
+      <div className="relative min-h-screen bg-background/50 pb-20">
+        {/* Animated Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+        </div>
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-8">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/admin/shipments')}
+              className="pl-0 hover:pl-2 transition-all text-muted-foreground hover:text-primary mb-4"
+            >
+              <ArrowRight className="h-4 w-4 mr-2 rotate-180" /> Back to Shipments
+            </Button>
+            <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+              Create New Shipment
+            </h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Enter shipment details to generate a tracking number and start processing.
             </p>
-          </div>
+          </motion.div>
 
           {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mb-8"
+            >
+              <Alert variant="destructive" className="border-red-500/20 bg-red-500/10">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </motion.div>
           )}
 
-          {success && (
-            <Alert variant="success" className="mb-6">
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
+          <form onSubmit={handleSubmit}>
+            <motion.div
+              variants={containerVideo}
+              initial="hidden"
+              animate="show"
+              className="space-y-8"
+            >
+              {/* Sender & Receiver Grid */}
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* Sender Information */}
+                <motion.div variants={itemVideo}>
+                  <Card className="h-full border-border/50 bg-card/50 backdrop-blur-xl shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                    <CardHeader className="pb-4">
+                      <div className="h-12 w-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4">
+                        <User className="h-6 w-6" />
+                      </div>
+                      <CardTitle>Sender Information</CardTitle>
+                      <CardDescription>Who is sending this package?</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Full Name</Label>
+                        <InputGroup icon={User}>
+                          <Input
+                            name="sender.name"
+                            required
+                            value={formData.sender.name}
+                            onChange={handleChange}
+                            placeholder="Sender Name"
+                            className="bg-background/50 border-white/10 focus:border-primary/50 transition-all hover:bg-background/80"
+                          />
+                        </InputGroup>
+                      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Sender Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <User className="h-5 w-5 mr-2" />
-                  Sender Information
-                </CardTitle>
-                <CardDescription>
-                  Details of the person or business sending the package
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="sender.name">Full Name *</Label>
-                  <Input
-                    id="sender.name"
-                    name="sender.name"
-                    required
-                    value={formData.sender.name}
-                    onChange={handleChange}
-                    placeholder="Enter sender's name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sender.phone">Phone Number *</Label>
-                  <Input
-                    id="sender.phone"
-                    name="sender.phone"
-                    type="tel"
-                    required
-                    value={formData.sender.phone}
-                    onChange={handleChange}
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sender.email">Email Address</Label>
-                  <Input
-                    id="sender.email"
-                    name="sender.email"
-                    type="email"
-                    value={formData.sender.email}
-                    onChange={handleChange}
-                    placeholder="Enter email address"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="origin">Origin Location *</Label>
-                  <Input
-                    id="origin"
-                    name="origin"
-                    required
-                    value={formData.origin}
-                    onChange={handleChange}
-                    placeholder="e.g., Lagos, Nigeria"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="sender.address">Full Address *</Label>
-                  <Textarea
-                    id="sender.address"
-                    name="sender.address"
-                    required
-                    rows={3}
-                    value={formData.sender.address}
-                    onChange={handleChange}
-                    placeholder="Enter complete pickup address"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Phone Number</Label>
+                          <InputGroup icon={Phone}>
+                            <Input
+                              name="sender.phone"
+                              required
+                              value={formData.sender.phone}
+                              onChange={handleChange}
+                              placeholder="+1 (555)..."
+                              className="bg-background/50 border-white/10"
+                            />
+                          </InputGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Email (Optional)</Label>
+                          <InputGroup icon={Mail}>
+                            <Input
+                              name="sender.email"
+                              type="email"
+                              value={formData.sender.email}
+                              onChange={handleChange}
+                              placeholder="sender@email.com"
+                              className="bg-background/50 border-white/10"
+                            />
+                          </InputGroup>
+                        </div>
+                      </div>
 
-            {/* Receiver Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Receiver Information
-                </CardTitle>
-                <CardDescription>
-                  Details of the person receiving the package
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2 mb-4">
-                  <Label htmlFor="user-select">Select Registered User</Label>
-                  <Select
-                    id="user-select"
-                    value={selectedUserId}
-                    onChange={handleUserSelect}
-                    disabled={loadingUsers}
-                  >
-                    <option value="">-- Select a user or fill manually --</option>
-                    {users.map(user => (
-                      <option key={user._id} value={user._id}>
-                        {user.name} ({user.email})
-                      </option>
-                    ))}
-                  </Select>
-                  {loadingUsers && (
-                    <p className="text-xs text-gray-500 mt-1">Loading users...</p>
+                      <div className="space-y-2">
+                        <Label>Origin City/State</Label>
+                        <InputGroup icon={MapPin}>
+                          <Input
+                            name="origin"
+                            required
+                            value={formData.origin}
+                            onChange={handleChange}
+                            placeholder="City, State, Country"
+                            className="bg-background/50 border-white/10"
+                          />
+                        </InputGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Full Address</Label>
+                        <InputGroup icon={MapPin}>
+                          <Textarea
+                            name="sender.address"
+                            required
+                            rows={3}
+                            value={formData.sender.address}
+                            onChange={handleChange}
+                            placeholder="Complete street address..."
+                            className="bg-background/50 border-white/10 resize-none pt-3"
+                          />
+                        </InputGroup>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                {/* Receiver Information */}
+                <motion.div variants={itemVideo}>
+                  <Card className="h-full border-border/50 bg-card/50 backdrop-blur-xl shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                    <CardHeader className="pb-4">
+                      <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4">
+                        <Truck className="h-6 w-6" />
+                      </div>
+                      <CardTitle>Receiver Information</CardTitle>
+                      <CardDescription>Where is this package going?</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 mb-4">
+                        <Label className="text-secondary-foreground mb-2 block">Quick Select User</Label>
+                        <Select
+                          value={selectedUserId}
+                          onChange={handleUserSelect}
+                          disabled={loadingUsers}
+                        >
+                          <option value="">-- Manual Entry --</option>
+                          {users.map(user => (
+                            <option key={user._id} value={user._id}>
+                              {user.name} ({user.email})
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Full Name</Label>
+                        <InputGroup icon={User}>
+                          <Input
+                            name="receiver.name"
+                            required
+                            value={formData.receiver.name}
+                            onChange={handleChange}
+                            placeholder="Receiver Name"
+                            className="bg-background/50 border-white/10"
+                          />
+                        </InputGroup>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Phone Number</Label>
+                          <InputGroup icon={Phone}>
+                            <Input
+                              name="receiver.phone"
+                              required
+                              value={formData.receiver.phone}
+                              onChange={handleChange}
+                              placeholder="+1 (555)..."
+                              className="bg-background/50 border-white/10"
+                            />
+                          </InputGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Email</Label>
+                          <InputGroup icon={Mail}>
+                            <Input
+                              name="receiver.email"
+                              type="email"
+                              required
+                              value={formData.receiver.email}
+                              onChange={handleChange}
+                              placeholder="receiver@email.com"
+                              className="bg-background/50 border-white/10"
+                            />
+                          </InputGroup>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Destination City/State</Label>
+                        <InputGroup icon={MapPin}>
+                          <Input
+                            name="destination"
+                            required
+                            value={formData.destination}
+                            onChange={handleChange}
+                            placeholder="City, State, Country"
+                            className="bg-background/50 border-white/10"
+                          />
+                        </InputGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Full Address</Label>
+                        <InputGroup icon={MapPin}>
+                          <Textarea
+                            name="receiver.address"
+                            required
+                            rows={3}
+                            value={formData.receiver.address}
+                            onChange={handleChange}
+                            placeholder="Complete street address..."
+                            className="bg-background/50 border-white/10 resize-none pt-3"
+                          />
+                        </InputGroup>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
+
+              {/* Package Details & Options */}
+              <motion.div variants={itemVideo}>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500">
+                        <Package className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle>Shipment Details</CardTitle>
+                        <CardDescription>Package specifications and delivery options</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid md:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <Label>Weight (kg)</Label>
+                        <InputGroup icon={Scale}>
+                          <Input
+                            name="packageDetails.weight"
+                            type="number"
+                            step="0.1"
+                            value={formData.packageDetails.weight}
+                            onChange={handleChange}
+                            placeholder="0.00"
+                            className="bg-background/50 border-white/10"
+                          />
+                        </InputGroup>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Declared Value</Label>
+                        <InputGroup icon={DollarSign}>
+                          <Input
+                            name="packageDetails.value"
+                            type="number"
+                            value={formData.packageDetails.value}
+                            onChange={handleChange}
+                            placeholder="0.00"
+                            className="bg-background/50 border-white/10"
+                          />
+                        </InputGroup>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Dimensions (LxWxH cm)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            name="packageDetails.dimensions.length"
+                            placeholder="L"
+                            className="bg-background/50 border-white/10 text-center px-1"
+                            onChange={handleChange}
+                          />
+                          <Input
+                            name="packageDetails.dimensions.width"
+                            placeholder="W"
+                            className="bg-background/50 border-white/10 text-center px-1"
+                            onChange={handleChange}
+                          />
+                          <Input
+                            name="packageDetails.dimensions.height"
+                            placeholder="H"
+                            className="bg-background/50 border-white/10 text-center px-1"
+                            onChange={handleChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label>Package Description</Label>
+                        <InputGroup icon={FileText}>
+                          <Textarea
+                            name="packageDetails.description"
+                            rows={3}
+                            value={formData.packageDetails.description}
+                            onChange={handleChange}
+                            placeholder="Describe the contents..."
+                            className="bg-background/50 border-white/10 resize-none pt-3"
+                          />
+                        </InputGroup>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Shipping Priority</Label>
+                          <div className="relative">
+                            <Select
+                              name="priority"
+                              value={formData.priority}
+                              onChange={handleChange}
+                              className="bg-background/50 border-white/10 w-full"
+                            >
+                              <option value="Low">Low Priority</option>
+                              <option value="Normal">Normal Priority</option>
+                              <option value="High">High Priority</option>
+                              <option value="Urgent">Urgent</option>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Estimated Delivery</Label>
+                          <div className="relative">
+                            <DatePicker
+                              selected={formData.estimatedDelivery}
+                              onChange={(date) => setFormData(prev => ({ ...prev, estimatedDelivery: date }))}
+                              minDate={new Date()}
+                              placeholderText="Select Date"
+                              className="w-full bg-background/50 border-white/10"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Actions */}
+              <motion.div
+                variants={itemVideo}
+                className="flex items-center justify-end gap-4 pt-4"
+              >
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate('/admin/shipments')}
+                  disabled={loading}
+                  className="rounded-xl px-8"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={loading}
+                  className="rounded-xl px-8 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-primary/20 transition-all"
+                >
+                  {loading ? (
+                    <>
+                      <Package className="h-4 w-4 animate-spin mr-2" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      Create Shipment <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
                   )}
-                </div>
-                <div>
-                  <Label htmlFor="receiver.name">Full Name *</Label>
-                  <Input
-                    id="receiver.name"
-                    name="receiver.name"
-                    required
-                    value={formData.receiver.name}
-                    onChange={handleChange}
-                    placeholder="Enter receiver's name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="receiver.phone">Phone Number *</Label>
-                  <Input
-                    id="receiver.phone"
-                    name="receiver.phone"
-                    type="tel"
-                    required
-                    value={formData.receiver.phone}
-                    onChange={handleChange}
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="receiver.email">Email Address *</Label>
-                  <Input
-                    id="receiver.email"
-                    name="receiver.email"
-                    type="email"
-                    required
-                    value={formData.receiver.email}
-                    onChange={handleChange}
-                    placeholder="Enter email address"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="destination">Destination Location *</Label>
-                  <Input
-                    id="destination"
-                    name="destination"
-                    required
-                    value={formData.destination}
-                    onChange={handleChange}
-                    placeholder="e.g., Abuja, Nigeria"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="receiver.address">Full Address *</Label>
-                  <Textarea
-                    id="receiver.address"
-                    name="receiver.address"
-                    required
-                    rows={3}
-                    value={formData.receiver.address}
-                    onChange={handleChange}
-                    placeholder="Enter complete delivery address"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Package Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Package className="h-5 w-5 mr-2" />
-                  Package Details
-                </CardTitle>
-                <CardDescription>
-                  Information about the package being shipped
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="packageDetails.weight">Weight (kg)</Label>
-                    <Input
-                      id="packageDetails.weight"
-                      name="packageDetails.weight"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      value={formData.packageDetails.weight}
-                      onChange={handleChange}
-                      placeholder="e.g., 2.5"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="packageDetails.value">Declared Value</Label>
-                    <Input
-                      id="packageDetails.value"
-                      name="packageDetails.value"
-                      type="number"
-                      min="0"
-                      value={formData.packageDetails.value}
-                      onChange={handleChange}
-                      placeholder="Package value in currency"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Dimensions (cm)</Label>
-                  <div className="grid grid-cols-3 gap-2 mt-1">
-                    <Input
-                      name="packageDetails.dimensions.length"
-                      type="number"
-                      min="0"
-                      value={formData.packageDetails.dimensions.length}
-                      onChange={handleChange}
-                      placeholder="Length"
-                    />
-                    <Input
-                      name="packageDetails.dimensions.width"
-                      type="number"
-                      min="0"
-                      value={formData.packageDetails.dimensions.width}
-                      onChange={handleChange}
-                      placeholder="Width"
-                    />
-                    <Input
-                      name="packageDetails.dimensions.height"
-                      type="number"
-                      min="0"
-                      value={formData.packageDetails.dimensions.height}
-                      onChange={handleChange}
-                      placeholder="Height"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="packageDetails.description">Description</Label>
-                  <Textarea
-                    id="packageDetails.description"
-                    name="packageDetails.description"
-                    rows={3}
-                    value={formData.packageDetails.description}
-                    onChange={handleChange}
-                    placeholder="Brief description of package contents"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Shipment Options */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Shipment Options
-                </CardTitle>
-                <CardDescription>
-                  Additional options and settings for the shipment
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    id="priority"
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                  >
-                    <option value="Low">Low Priority</option>
-                    <option value="Normal">Normal Priority</option>
-                    <option value="High">High Priority</option>
-                    <option value="Urgent">Urgent</option>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="estimatedDelivery">Estimated Delivery Date</Label>
-                  <DatePicker
-                    id="estimatedDelivery"
-                    selected={formData.estimatedDelivery}
-                    onChange={(date) => setFormData(prev => ({ ...prev, estimatedDelivery: date }))}
-                    minDate={new Date()}
-                    placeholderText="Select estimated delivery date"
-                    isClearable
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Submit Buttons */}
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/admin/shipments')}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Package className="h-4 w-4 animate-spin mr-2" />
-                    Creating Shipment...
-                  </>
-                ) : (
-                  'Create Shipment'
-                )}
-              </Button>
-            </div>
+                </Button>
+              </motion.div>
+            </motion.div>
           </form>
         </div>
       </div>

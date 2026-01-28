@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { X, MapPin, Package } from 'lucide-react'
+import { X, MapPin, Package, Save, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { shipmentAPI } from '../../lib/api'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -16,6 +17,17 @@ const UpdateStatusModal = ({ shipment, onClose, onSuccess }) => {
     location: shipment.currentLocation || '',
     note: ''
   })
+
+  // Animation variants
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
+  }
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0 }
+  }
 
   const statusOptions = [
     { value: 'Pending', label: 'Pending' },
@@ -50,109 +62,129 @@ const UpdateStatusModal = ({ shipment, onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        <motion.div
+          variants={backdropVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         />
-        
+
         {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <motion.div
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          className="relative w-full max-w-md overflow-hidden rounded-2xl bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 shadow-2xl"
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Update Shipment Status</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                {shipment.trackingNumber}
+              <h3 className="text-xl font-bold text-white">Update Status</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Tracking ID: <span className="font-mono text-primary">{shipment.trackingNumber}</span>
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            <div>
-              <Label htmlFor="status">Status *</Label>
-              <Select
-                id="status"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                required
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="status" className="text-sm font-medium text-gray-300">New Status</Label>
+                <div className="relative">
+                  <Select
+                    id="status"
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    required
+                    className="bg-black/40 border-white/10 text-white focus:border-primary/50 h-11"
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value} className="bg-gray-900 text-white">
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
 
-            <div>
-              <Label htmlFor="location">Current Location *</Label>
-              <div className="relative">
-                <MapPin className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="e.g., Lagos Warehouse, Nigeria"
-                  className="pl-10"
-                  required
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-medium text-gray-300">Current Location</Label>
+                <div className="relative group">
+                  <MapPin className="h-4 w-4 absolute left-3 top-3.5 text-gray-500 group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="e.g., Lagos Warehouse, Nigeria"
+                    className="pl-10 bg-black/40 border-white/10 text-white focus:border-primary/50 h-11 placeholder:text-gray-600"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="note" className="text-sm font-medium text-gray-300">Optional Note</Label>
+                <Textarea
+                  id="note"
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  placeholder="Add any relevant details about this update..."
+                  rows={3}
+                  className="bg-black/40 border-white/10 text-white focus:border-primary/50 placeholder:text-gray-600 resize-none"
                 />
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="note">Note (Optional)</Label>
-              <Textarea
-                id="note"
-                value={formData.note}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                placeholder="Add any relevant notes about this update..."
-                rows={3}
-              />
-            </div>
-
-            {/* Current Info */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase">Current Status</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-900">{shipment.status}</span>
-                {shipment.currentLocation && (
-                  <span className="text-xs text-gray-500 flex items-center">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {shipment.currentLocation}
+              {/* Current Status Card */}
+              <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Current State</p>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                    {shipment.status}
                   </span>
-                )}
+                  {shipment.currentLocation && (
+                    <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-gray-500" />
+                      {shipment.currentLocation}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={loading}
+                className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
               >
                 {loading ? (
                   <>
@@ -160,14 +192,17 @@ const UpdateStatusModal = ({ shipment, onClose, onSuccess }) => {
                     Updating...
                   </>
                 ) : (
-                  'Update Status'
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Update Status
+                  </>
                 )}
               </Button>
             </div>
           </form>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   )
 }
 
