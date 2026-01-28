@@ -225,13 +225,13 @@ const LandingPage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <form onSubmit={handleTrack} className="flex-1 max-w-md relative flex items-center shadow-lg rounded-full bg-background border p-1 pl-4 transition-all focus-within:ring-2 ring-primary/20">
-                  <Search className="h-5 w-5 text-muted-foreground" />
+                <form onSubmit={handleTrack} className="flex-1 max-w-md relative flex items-center shadow-lg rounded-full bg-background border p-1 pl-4 transition-all focus-within:ring-2 ring-primary/20 z-30">
+                  <Search className="h-5 w-5 text-muted-foreground pointer-events-none" />
                   <Input
                     placeholder="Enter tracking number..."
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
-                    className="border-0 shadow-none bg-transparent focus-visible:ring-0 h-12 text-base px-4"
+                    className="flex-1 w-full border-0 shadow-none bg-transparent focus-visible:ring-0 h-12 text-base px-4 placeholder:text-muted-foreground/50"
                   />
                   <Button type="submit" size="lg" className="rounded-full h-10 px-8">
                     Track
