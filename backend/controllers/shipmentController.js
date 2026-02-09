@@ -16,7 +16,7 @@ const createShipment = async (req, res) => {
     // Geocode the origin for initial location
     if (shipment.origin) {
       const originCoords = await geocodeAddress(shipment.origin);
-      
+
       // Add initial history entry
       shipment.addHistory({
         status: 'Pending',
@@ -67,13 +67,13 @@ const createShipment = async (req, res) => {
     });
   } catch (error) {
     console.error('Create shipment error:', error);
-    
+
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => ({
         field: err.path,
         message: err.message
       }));
-      
+
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -101,11 +101,11 @@ const getShipments = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     // Build query based on user role and filters
     let query = { isActive: true };
     let userFilter = null;
-    
+
     if (req.user.role === 'user') {
       // Users can only see shipments where they are the sender OR receiver
       userFilter = {
@@ -120,11 +120,11 @@ const getShipments = async (req, res) => {
     if (req.query.status) {
       query.status = req.query.status;
     }
-    
+
     if (req.query.trackingNumber) {
       query.trackingNumber = new RegExp(req.query.trackingNumber, 'i');
     }
-    
+
     if (req.query.userId && req.user.role === 'admin') {
       query.createdBy = req.query.userId;
     }
@@ -179,7 +179,7 @@ const getShipments = async (req, res) => {
 const getShipmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Build query - for non-admin users, check ownership
     let query;
     if (req.user.role === 'admin') {
@@ -216,7 +216,7 @@ const getShipmentById = async (req, res) => {
     });
   } catch (error) {
     console.error('Get shipment by ID error:', error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -236,9 +236,9 @@ const getShipmentByTrackingNumber = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
 
-    const shipment = await Shipment.findOne({ 
+    const shipment = await Shipment.findOne({
       trackingNumber: trackingNumber.toUpperCase(),
-      isActive: true 
+      isActive: true
     })
       .populate('createdBy', 'name')
       .populate('history.updatedBy', 'name')
@@ -273,7 +273,7 @@ const updateShipment = async (req, res) => {
     const { status, location, note } = req.body;
 
     const shipment = await Shipment.findById(id);
-    
+
     if (!shipment) {
       return res.status(404).json({
         success: false,
@@ -303,20 +303,12 @@ const updateShipment = async (req, res) => {
       { path: 'history.updatedBy', select: 'name email' }
     ]);
 
-    // Send email notification
+    // Send email notification to receiver only
     try {
       const oldStatus = shipment.history.length > 1 ? shipment.history[shipment.history.length - 2].status : 'New';
       const emailContent = shipmentStatusUpdateEmail(shipment, oldStatus);
-      
-      // Send to sender
-      await sendEmail({
-        to: shipment.sender.email,
-        subject: emailContent.subject,
-        html: emailContent.html,
-        text: emailContent.text
-      });
 
-      // Send to receiver
+      // Send to receiver only (person receiving the goods)
       await sendEmail({
         to: shipment.receiver.email,
         subject: emailContent.subject,
@@ -324,7 +316,7 @@ const updateShipment = async (req, res) => {
         text: emailContent.text
       });
 
-      console.log(`📧 Status update emails sent for ${shipment.trackingNumber}`);
+      console.log(`📧 Status update email sent to receiver for ${shipment.trackingNumber}`);
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError);
       // Don't fail the request if email fails
@@ -337,7 +329,7 @@ const updateShipment = async (req, res) => {
         shipment: shipment,
         checkpoint: historyEntry
       });
-      
+
       console.log(`Socket event emitted for tracking:${shipment.trackingNumber}`);
     }
 
@@ -351,7 +343,7 @@ const updateShipment = async (req, res) => {
     });
   } catch (error) {
     console.error('Update shipment error:', error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -364,7 +356,7 @@ const updateShipment = async (req, res) => {
         field: err.path,
         message: err.message
       }));
-      
+
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -384,7 +376,7 @@ const updateShipmentDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
-    
+
     // Remove fields that shouldn't be updated directly
     delete updateData.trackingNumber;
     delete updateData.history;
@@ -414,13 +406,13 @@ const updateShipmentDetails = async (req, res) => {
     });
   } catch (error) {
     console.error('Update shipment details error:', error);
-    
+
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => ({
         field: err.path,
         message: err.message
       }));
-      
+
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -480,12 +472,12 @@ const getShipmentStats = async (req, res) => {
     ]);
 
     const totalShipments = await Shipment.countDocuments({ isActive: true });
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayShipments = await Shipment.countDocuments({ 
-      isActive: true, 
-      createdAt: { $gte: today } 
+    const todayShipments = await Shipment.countDocuments({
+      isActive: true,
+      createdAt: { $gte: today }
     });
 
     res.json({

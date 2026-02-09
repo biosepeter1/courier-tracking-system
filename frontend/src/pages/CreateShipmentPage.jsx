@@ -31,6 +31,18 @@ import { DatePicker } from '../components/ui/datepicker'
 import Layout from '../components/Layout'
 import { cn } from '../lib/utils'
 
+// InputGroup defined outside component to prevent re-creation on each render
+const InputGroup = ({ icon: Icon, children, className }) => (
+  <div className={cn("relative", className)}>
+    <div className="absolute left-3 top-3 text-muted-foreground/50">
+      <Icon className="h-5 w-5" />
+    </div>
+    <div className="[&>input]:pl-10 [&>textarea]:pl-10 [&>select]:pl-10">
+      {children}
+    </div>
+  </div>
+)
+
 const containerVideo = {
   hidden: { opacity: 0 },
   show: {
@@ -286,17 +298,6 @@ const CreateShipmentPage = () => {
       setLoading(false)
     }
   }
-
-  const InputGroup = ({ icon: Icon, children, className }) => (
-    <div className={cn("relative", className)}>
-      <div className="absolute left-3 top-3 text-muted-foreground/50">
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="[&>input]:pl-10 [&>textarea]:pl-10 [&>select]:pl-10">
-        {children}
-      </div>
-    </div>
-  )
 
   return (
     <Layout>
